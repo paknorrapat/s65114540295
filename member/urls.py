@@ -1,0 +1,16 @@
+from django.contrib import admin
+from django.urls import path
+from .views import *
+
+urlpatterns = [
+    path('appointment/',appointment_view,name='appointment'),
+    path('appointment-success/',appointment_success_view,name='appointment_success'),
+    path('get-time-slots/',get_time_slots,name='get_time_slots'),
+    path('calendar/', calendar_view, name='calendar'),
+
+    path('member_home',member_home,name='member-home'),
+    path("appointment/delete/<int:id>/",delete_appointment_member,name="member-appointment-delete"),
+    path("appointment/edit/<int:id>/",edit_appointment_member,name="member-appointment-edit"),
+
+    path('select-appointment-date/<int:appointment_id>/',select_appointment_date, name='select-appointment-date'),
+]

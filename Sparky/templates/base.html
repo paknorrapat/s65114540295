@@ -1,0 +1,57 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPARKY</title>
+    {% tailwind_css %}
+    <!-- เพิ่มลิงก์ Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- ลิงก์ Google Font Fahkwang -->
+    <link href="https://fonts.googleapis.com/css2?family=Fahkwang:wght@400;600&display=swap" rel="stylesheet">
+       
+</head>
+<body class="flex flex-col min-h-screen font-fahkwang">
+  <div class="flex flex-grow bg-[#7469B6]">
+    {% include 'header.html' %}
+    
+    <main class="flex-grow p-6 rounded-3xl mx-2 my-4 mr-4 shadow-xl bg-[#F1F1FF]">
+        <div class="relative flex flex-col justify-between">
+          <div>
+              <ul>
+                  <li class="text-xl font-semibold text-[#7B42C4]">ยินดีต้อนรับเข้าสู่หน้าหลัก<span> สวัสดีคุณ {{user.first_name}} {{user.last_name}}</span></li>
+              </ul>
+          </div>
+      
+          <!-- Div สำหรับแสดงวันและเวลา -->
+          <!-- <div class="absolute top-0 right-0 ">
+              <span id="datetime"></span>
+          </div> -->
+        </div>
+        {% block main %}
+
+        {% endblock %}
+    </main>
+  </div>
+    {% include 'footer.html' %}
+  </body>
+</html>
+
+<!-- <script>
+  function updateDateTime() {
+      const now = new Date();
+      const options = {
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric', 
+          hour: 'numeric', 
+          minute: 'numeric', 
+          second: 'numeric'
+      };
+      document.getElementById('datetime').textContent = now.toLocaleDateString('th-TH', options);
+  }
+
+  setInterval(updateDateTime, 1000); // อัปเดตทุกวินาที
+</script> -->

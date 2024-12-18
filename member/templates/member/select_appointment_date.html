@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+<div class="mt-8 flex flex-col justify-center items-center">
+    <div class="w-1/3">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full">
+            <h3 class="text-xl font-semibold mb-4">เลือกวันเวลา</h3>
+            <form  method="POST" >
+            {% csrf_token %}
+            <div class="mt-4">
+                        <label for="dentist">ชื่อทันตแพทย์</label>
+                        <input type="hidden" id="dentist" name="dentist" value="{{appointment.dentist.id}}" class="select select-bordered w-full max-w-xs my-1">
+
+                        <label for="date">วันที่นัดหมาย</label><br>
+                        <input type="date" id="date" name="date" required class="input input-bordered w-full my-1" /><br>
+                    
+                        <!-- เพิ่ม Dropdown สำหรับ Time Slot -->
+                        <label for="time_slot">เวลา</label><br>
+                        <select id="time_slot" name="time_slot" required class="select select-bordered w-full   my-1">
+                            <option value="">เลือกเวลา</option>
+                        </select> <br>
+
+                        <div class="mt-4 flex justify-center">
+                        <button type="submit" class="btn btn-neutral mr-2">เพิ่มวันเวลา</button>
+                        <a href="{% url 'member-home' %}" class="btn btn-ghost " >ยกเลิก</a>
+                        </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function updateTimeSlots() {
+        var selectedDate = document.getElementById('date').value;
+        var selectedDentist = document.getElementById('dentist').value;
+        var timeSlotSelect = document.getElementById('time_slot');
+
+        // ล้าง Time Slot เก่า
+        timeSlotSelect.innerHTML = '<option value="">เลือกเวลา</option>';
+
+        // ตรวจสอบว่ามีการเลือกทั้งวันที่และทันตแพทย์
+        if (selectedDate && selectedDentist) {
+            // ดึงข้อมูล Slot เวลาจาก Server โดยใช้ Ajax
+            fetch(`/member/get-time-slots/?date=${selectedDate}&dentist_id=${selectedDentist}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.slots && data.slots.length > 0) {
+                        data.slots.forEach(function(slot) {
+                            var option = document.createElement('option');
+                            option.value = slot;
+                            option.textContent = slot;
+                            timeSlotSelect.appendChild(option);
+                        });
+                    } else {
+                        console.log("No slots available.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching time slots:', error);
+                });
+        }
+    }
+
+    // เชื่อม Event กับ Date และ Dentist Dropdown
+    document.getElementById('date').addEventListener('change', updateTimeSlots);
+    document.getElementById('dentist').addEventListener('change', updateTimeSlots);
+</script>      
+{% endblock %}

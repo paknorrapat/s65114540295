@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="mt-8 flex flex-col justify-center items-center">
+    <div class="w-1/3">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full">
+            <h3 class="text-xl font-semibold mb-4">นัดหมายจัดฟัน</h3>
+            <p>คุณต้องการเพิ่มการนัดหมายนี้หรือไม่?</p>
+            <form  method="POST" >
+            {% csrf_token %}
+            <div class="mt-4">
+                        <label for="user">ชื่อคนไข้</label><br>
+                        <select type="text" id="user" name="user" required class="select select-bordered w-full  my-1" >
+                            <option value="" disabled selected>เลือกคนไข้</option> 
+                                {% for user in users %}
+                                    <option value="{{user.id}}">{{user.title}}{{user.first_name}} {{user.last_name}}</option>
+                                {% endfor %}
+                        </select><br>
+
+                        <label for="dentist">ชื่อทันตแพทย์</label><br>
+                        <select type="text" id="dentist" name="dentist" required class="select select-bordered w-full my-1" >
+                            <option value="" disabled selected>เลือกทันตแพทย์</option> 
+                                {% for dentist in dentists %}
+                                    <option value="{{dentist.id}}">{{dentist.dentistName}}</option>
+                                {% endfor%}
+                        </select><br>
+
+                        <label for="treatment">รายการนัดหมาย</label><br>
+                        <select type="text" id="treatment" name="treatment" required class="select select-bordered w-full  my-1" >
+                            <option value="" disabled selected>เลือกรายการ</option> 
+                                {% for treatment in treatments %}
+                                    <option value="{{treatment.id}}">{{treatment.treatmentName}}</option>
+                                {% endfor%}
+                        </select><br>
+
+                        <div class="mt-4 flex justify-center">
+                        <button type="submit" class="btn btn-neutral mr-2">เพิ่มนัดหมาย</button>
+                        <a href="{% url 'staff-home' %}" class="btn btn-ghost " >ยกเลิก</a>
+                        </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+  
+</script>
+{% endblock %}
