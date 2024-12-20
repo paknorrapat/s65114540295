@@ -10,9 +10,6 @@ from .models import User,Profile
 def firstpage(request):
     return render(request,"firstpage.html")
 
-def home(request):
-    return render(request,"home.html")
-
 def calculate_age(birth_date):
     today = datetime.now().date()
     age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
@@ -71,7 +68,7 @@ def profile(request,user_id):
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
-            return redirect('home')
+            return redirect('login')
         
     else:
         profile_form = ProfileForm()
