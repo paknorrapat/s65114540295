@@ -5,8 +5,8 @@ from .views import *
 urlpatterns = [
     path("staff_home/",staff_home,name="staff-home"),
     path("appointment/delete/<int:id>/",delete_appointment,name="appointment-delete"),
-    path("appointment/add/",add_appointment,name="appointment-add"),
-    path("appointment/edit/<int:appointment_id>/",edit_appointment,name="appointment-edit"),
+    path("appointment/add/<int:user_id>/",add_appointment,name="appointment-add"),
+    path('appointment/update/<int:appointment_id>/',update_appointment, name='appointment-update'),
     path("appointment/add_braces/",add_braces_appointment,name="appointment-add-braces"),
 
     path("dentist_manage/",dentist_manage,name="dentist-manage"),
@@ -20,6 +20,7 @@ urlpatterns = [
     path("edit_treatment/<int:treatment_id>/",edit_treatment,name="edit-treatment"),
 
     path("appointment_list/",appointment_list,name="appointment-list"),
+    path("member_info/",member_info,name="member-info"),
 
 
 ]

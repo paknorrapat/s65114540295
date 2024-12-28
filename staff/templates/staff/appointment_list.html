@@ -1,125 +1,109 @@
 {% extends 'base.html' %}
 
 {% block main %}
-<div class="mt-5 mb-3">
-    <h1 class="font-medium text-xl text-[#F3209D] ">นัดหมาย</h1>
-</div>
-<div class="mb-4 flex flex-wrap gap-x-8">
-    <a  href="{% url 'staff-home' %}" class="bg-white p-8 rounded-lg border border-[#7469B6] w-1/4 shadow-md">
-        <h2 class="text-lg  text-center mb-2 text-[#7B42C4]">จำนวนนัดหมายวันนี้</h2>
-        <h2 class="text-lg text-center"> {{ appointment_count_today }}</h2>
-    </a>
-    <div class="bg-white p-8 rounded-lg border border-[#7469B6] w-1/4 shadow-md">
-        <h2 class="text-lg  text-center mb-2 text-[#7B42C4]">จำนวนนัดหมายทั้งหมด</h2>
-        <h2 class="text-lg text-center"> {{ appointment_count }}</h2>
-    </div>
-</div>
-
-<div class="mt-5 mb-3">
-    <h1 class="font-medium text-xl text-[#F3209D] ">นัดหมายทั้งหมด</h1>
-</div>
 
 
-<div class="bg-white p-8 rounded-lg border border-[#7469B6]">
-    <div class="overflow-x-auto">
-        <table class="table">
-          <!-- head -->
-          <thead>
-            <tr>
-              <th>ชื่อ</th>
-              <th>รายการ</th>
-              <th>วัน</th>
-              <th>เวลา</th>
-              <th>สถานะ</th>
-              <th>ตัวเลือก</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for appointment in page_obj %}
-            <!-- row 1 -->
-            <tr>
-              <td>
-                <div class="flex items-center gap-3">
-                  <div class="avatar">
-                    <div class="mask mask-squircle h-12 w-12">
-                      <img
-                        src="{{appointment.user.profile.image.url}}"
-                        alt="รูปโปรไฟล์ของผู้ใช้" />
-                    </div>
-                  </div>
-                  <div>
-                    <div class="font-bold">{{appointment.user.title}}{{appointment.user.first_name}} {{appointment.user.last_name}}</div>
-                    <div class="text-sm opacity-50">{{appointment.user.profile.phone}}</div>
-                  </div>
-                </div>
-              </td>
-              <td>
-                {% if appointment.detail %}
-                {{appointment.detail}} {{appointment.treatment}}
-                {% else %}
-                {{appointment.treatment}}
-                {% endif %}
-                <br />
-                <span class="badge badge-ghost badge-sm">{{appointment.dentist}}</span>
-              </td>
-              <td>{{appointment.date|date:"j F Y"}}</td>
-              <th>
-                <button class="btn btn-ghost btn-xs">{{appointment.time_slot|time:"H:i"}}</button>
-              </th>
-              <th>
-                <button class="btn btn-ghost btn-xs">{{appointment.status}}</button>
-              </th>
-              <th>
-                <a href="{% url 'appointment-edit' appointment.id %}" >
-                  <i class="fa-regular fa-pen-to-square text-xl mr-2"></i>
-                </a>
-
-                <a href="#" onclick="openDeleteModal('{{ appointment.id }}')">
-                  <i class="fa-solid fa-trash text-xl"></i>
-                </a>             
-              </th>
-            </tr>
-            
-            {% endfor %}
-          </tbody>
-          
-        </table>
-        
-      </div>
-
+<!-- นัดหมายทั้งหมด-->
+<div class=" mx-4 bg-white p-4  rounded-2xl w-full">
+  <div class="ml-3 mt-1 mb-1">
+    <span class="text-lg text-blue-800">นัดหมายทั้งหมด</span>
+  </div>
+  <table class="table ">
+    <!-- head -->
+    <thead>
+      <tr>
+        <th class="text-center">ชื่อ</th>
+        <th class="text-center">รายการ</th>
+        <th class="text-center">วัน</th>
+        <th class="text-center">เวลา</th>
+        <th class="text-center">สถานะ</th>
+        <th class="text-center">ตัวเลือก</th>
       
-
-      <!-- Modal ลบ-->
-      <div id="deleteModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-          <h3 class="text-xl font-semibold mb-4">ยืนยันการลบ</h3>
-          <p>คุณต้องการลบการนัดหมายนี้หรือไม่?</p>
-          <form id="deleteForm" method="POST">
-            {% csrf_token %}
-            <div class="mt-4 flex justify-end">
-              <button type="button" class="btn btn-ghost mr-2" onclick="closeDeleteModal()">ยกเลิก</button>
-              <button type="submit" class="btn btn-error">ลบ</button>
+      </tr>
+    </thead>
+    <tbody>
+      {% for apt in page_obj %}
+      <!-- row 1 -->
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="avatar">
+              <div class="mask mask-squircle h-12 w-12">
+                <img
+                  src="{{apt.user.profile.image.url}}"
+                  alt="รูปโปรไฟล์ของผู้ใช้" />
+              </div>
             </div>
-          </form>
-        </div>
+            <div>
+              <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
+            </div>
+          </div>
+        </td>
+        <td class="text-center">
+          {% if apt.detail %}
+          <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
+          {% else %}
+          <div class="text-xs">{{apt.treatment}}</div>
+          {% endif %}
+          <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
+        </td>
+        <td>
+          <div class="text-xs">{{apt.date}}</div>
+        </td>
+        <td>
+          <div class="text-xs">{{apt.time_slot}}</div>
+        </td>
+        <td>
+          <div class="text-center text-xs">{{apt.status}}</div>
+        </td>
+        <td>
+          <a href="{% url 'appointment-update' apt.id%}">
+            <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500"></i>
+          </a>
+          <a href="#" onclick="openDeleteModal('{{ apt.id }}')">
+            <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
+          </a>
+        </td>
+    
+
+        
+      </tr>      
+    {% endfor %}
+    </tbody>
+    
+    
+  </table>
+  <div class="flex justify-center mt-4">
+    <nav class="btn-group">
+        {% if page_obj.has_previous %}
+        <a href="?page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+        {% endif %}
+
+        <span class="btn btn-disabled btn-sm">หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+        {% endif %}
+    </nav>
+ </div>
+  
+ </div>
+
+ <!-- Modal ลบ-->
+ <div id="deleteModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+    <h3 class="text-xl font-semibold mb-4">ยืนยันการลบ</h3>
+    <p>คุณต้องการลบการนัดหมายนี้หรือไม่?</p>
+    <form id="deleteForm" method="POST">
+      {% csrf_token %}
+      <div class="mt-4 flex justify-end">
+        <button type="button" class="btn btn-ghost mr-2" onclick="closeDeleteModal()">ยกเลิก</button>
+        <button type="submit" class="btn btn-error">ลบ</button>
       </div>
-
-
-      <div class="flex justify-center mt-4">
-        <nav class="btn-group">
-            {% if page_obj.has_previous %}
-            <a href="?page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-            {% endif %}
-    
-            <span class="btn btn-disabled btn-sm">หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}</span>
-    
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-            {% endif %}
-        </nav>
-     </div>
+    </form>
+  </div>
 </div>
 <script>
   // ลบบบบบ #####
@@ -132,6 +116,6 @@
     document.getElementById('deleteModal').classList.add('hidden');
   }
   
-  
+
 </script>
 {% endblock %}

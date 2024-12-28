@@ -1,95 +1,119 @@
 {% extends 'base.html' %}
 
 {% block main %}
-<div class="mt-5 mb-3">
-    <h1 class="font-medium text-xl text-[#F3209D] ">นัดหมาย</h1>
-</div>
-<div class="flex flex-wrap gap-x-8">
-    <div class="bg-white p-8 rounded-lg border border-[#7469B6] w-1/4 shadow-md">
-        <h2 class="text-lg  text-center mb-2 text-[#7B42C4]">จำนวนนัดหมายวันนี้</h2>
-        <h2 class="text-lg text-center"> {{ appointment_count_today }}</h2>
-    </div>
-    <a href="{% url 'appointment-list' %}" class="bg-white p-8 rounded-lg border border-[#7469B6] w-1/4 shadow-md">
-        <h2 class="text-lg  text-center mb-2 text-[#7B42C4]">จำนวนนัดหมายทั้งหมด</h2>
-        <h2 class="text-lg text-center"> {{ appointment_count }}</h2>
-    </a>
-</div>
-<div class=" my-5">
-    <a  href="#" onclick="openAddModal()" class="btn bg-[#7B42C4] text-white hover:bg-[#7469B6]">เพิ่มนัดหมาย</a>
-    <a  href="{% url 'appointment-add-braces' %}"  class="btn bg-[#7B42C4] text-white hover:bg-[#7469B6]">เพิ่มนัดหมายจัดฟัน</a>
-    <a  href="{% url 'calendar' %}" class="btn bg-[#7B42C4] text-white hover:bg-[#7469B6]">ปฏิทิน</a>
-</div>
-<div class="mt-5 mb-3">
-  <h1 class="font-medium text-xl text-[#F3209D] ">นัดหมายวันนี้</h1>
-</div>
-<!-- Modal เพิ่ม-->
-<div id="addModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
-  <div class="w-1/3 max-w-md">
-      <div class="bg-white p-6 rounded-lg shadow-lg w-full">
-        <h3 class="text-xl font-semibold mb-4">นัดหมาย</h3>
-        <p>คุณต้องการเพิ่มการนัดหมายนี้หรือไม่?</p>
-        <form id="addForm" method="POST" >
-          {% csrf_token %}
-          <div class="mt-4">
-                    <label for="user">ชื่อคนไข้</label><br>
-                    <select type="text" id="user" name="user" required class="select select-bordered w-full  my-1" >
-                        <option value="" disabled selected>เลือกคนไข้</option> 
-                            {% for user in users %}
-                                <option value="{{user.id}}">{{user.title}}{{user.first_name}} {{user.last_name}}</option>
-                            {% endfor %}
-                    </select><br>
-
-                    <label for="dentist">ชื่อทันตแพทย์</label><br>
-                      <select type="text" id="dentist" name="dentist" required class="select select-bordered w-full my-1" >
-                          <option value="" disabled selected>เลือกทันตแพทย์</option> 
-                              {% for dentist in dentists %}
-                                  <option value="{{dentist.id}}">{{dentist.dentistName}}</option>
-                              {% endfor%}
-                      </select><br>
-
-                    <label for="treatment">รายการนัดหมาย</label><br>
-                    <select type="text" id="treatment" name="treatment" required class="select select-bordered w-full  my-1" >
-                        <option value="" disabled selected>เลือกรายการ</option> 
-                            {% for treatment in treatments %}
-                                <option value="{{treatment.id}}">{{treatment.treatmentName}}</option>
-                            {% endfor%}
-                    </select><br>
-
-                    <label for="date">วันที่นัดหมาย</label><br>
-                    <input type="date" id="date" name="date" required class="input input-bordered w-full my-1" /><br>
-                
-                    <!-- เพิ่ม Dropdown สำหรับ Time Slot -->
-                    <label for="time_slot">เวลา</label><br>
-                    <select id="time_slot" name="time_slot" required class="select select-bordered w-full   my-1">
-                        <option value="">เลือกเวลา</option>
-                    </select> <br>
-
-                    <div class="mt-4 flex justify-end">
-                      <button type="submit" class="btn btn-neutral mr-2">บันทึกการนัดหมาย</button>
-                      <button type="button" class="btn btn-ghost " onclick="closeAddModal()">ยกเลิก</button>
-                    </div>
-          </div>
-        </form>
+<!-- นัดหมายวันนี้-->
+<div class="flex justify-between">
+  <div class="mx-3" >
+    <div class=" bg-white p-4  rounded-2xl w-full mb-4">
+      <div class="ml-3 mt-1 mb-1">
+        <span class=" text-lg text-blue-800">นัดหมายวันนี้</span>
       </div>
-    </div>
-</div>
+      <table class="table ">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th class="text-center">ชื่อ</th>
+            <th class="text-center">รายการ</th>
+            <th class="text-center">เวลา</th>
+            <th class="text-center">ตัวเลือก</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for apt in appointment_page_obj %}
+          <!-- row 1 -->
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar">
+                  <div class="mask mask-squircle h-12 w-12">
+                    <img
+                      src="{{apt.user.profile.image.url}}"
+                      alt="รูปโปรไฟล์ของผู้ใช้" />
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              {% if apt.detail %}
+              <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
+              {% else %}
+              <div class="text-xs">{{apt.treatment}}</div>
+              {% endif %}
+              <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
+            </td>
+            <td>
+              <div class="text-xs">{{apt.time_slot}}</div>
+            </td>
+            <th class="flex justify-center items-center mt-3.5">
+              {% if apt.status == 'รอดำเนินการ' %}
+              <a href="{% url 'appointment-update' apt.id%}">
+                <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
+              </a>
+  
+              {% elif apt.status == 'สำเร็จ' %}
+              <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
+              {% else %} 
+              <i class="fa-regular fa-rectangle-xmark text-xl mr-2 text-red-500"></i>
+              {% endif %}
+            </th>
 
-<div class="bg-white p-8 rounded-lg border border-[#7469B6]">
-    <div class="overflow-x-auto">
-        <table class="table">
+            
+          </tr>      
+        {% endfor %}
+        </tbody>
+        
+        
+      </table>
+      <div class="flex justify-center mt-4">
+        <nav class="btn-group">
+            {% if appointment_page_obj.has_previous %}
+            <a href="?appointment_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
+            <a href="?appointment_page={{ appointment_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+            {% endif %}
+
+            <span class="btn btn-disabled btn-sm">หน้า {{ appointment_page_obj.number }} จาก {{ appointment_page_obj.paginator.num_pages }}</span>
+
+            {% if appointment_page_obj.has_next %}
+            <a href="?appointment_page={{ appointment_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+            <a href="?appointment_page={{ appointment_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+            {% endif %}
+        </nav>
+    </div>
+      
+    </div>
+
+    <!-- เพิ่มนัดหมาย-->
+
+    <div class=" bg-white p-4 rounded-2xl w-full">
+      <div class="ml-3 mt-1">
+        <span class="text-lg text-blue-800">เพิ่มนัดหมาย</span>
+      </div>
+      <div class="overflow-x-auto p-3">
+        <form method="GET" class="flex items-center space-x-2 mb-4">
+          <input 
+            type="text" 
+            name="search" 
+            placeholder="ค้นหาชื่อคนไข้..."
+            class=" text-sm border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 p-1 w-full"
+            value="{{ request.GET.search }}">
+          <button type="submit" class="text-blue-500">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+
+        <table class="table ">
           <!-- head -->
           <thead>
             <tr>
-              <th>ชื่อ</th>
-              <th>รายการ</th>
-              <th>วัน</th>
-              <th>เวลา</th>
-              <th>สถานะ</th>
-              <th>ตัวเลือก</th>
+              <th >ชื่อ</th>
+              <th class="text-center">ตัวเลือก</th>
             </tr>
           </thead>
           <tbody>
-            {% for appointment in page_obj %}
+            {% for user in user_page_obj %}
             <!-- row 1 -->
             <tr>
               <td>
@@ -97,106 +121,134 @@
                   <div class="avatar">
                     <div class="mask mask-squircle h-12 w-12">
                       <img
-                        src="{{appointment.user.profile.image.url}}"
+                        src="{{user.profile.image.url}}"
                         alt="รูปโปรไฟล์ของผู้ใช้" />
                     </div>
                   </div>
                   <div>
-                    <div class="font-bold">{{appointment.user.title}}{{appointment.user.first_name}} {{appointment.user.last_name}}</div>
-                    <div class="text-sm opacity-50">{{appointment.user.profile.phone}}</div>
+                    <div class="text-sm">{{user.title}}{{user.first_name}} {{user.last_name}}</div>
                   </div>
                 </div>
-              </td>
-              <td>
-                {% if appointment.detail %}
-                {{appointment.detail}} {{appointment.treatment}}
-                {% else %}
-                {{appointment.treatment}}
-                {% endif %}
-                <br />
-                <span class="badge badge-ghost badge-sm">{{appointment.dentist}}</span>
-              </td>
-              <td>{{appointment.date|date:"j F Y"}}</td>
-              <th>
-                <button class="btn btn-ghost btn-xs">{{appointment.time_slot|time:"H:i"}}</button>
-              </th>
-              <th>
-                <button class="btn btn-ghost btn-xs">{{appointment.status}}</button>
-              </th>
-              <th>
-                <a href="{% url 'appointment-edit' appointment.id %}" >
-                  <i class="fa-regular fa-pen-to-square text-xl mr-2"></i>
-                </a>
-
-                <a href="#" onclick="openDeleteModal('{{ appointment.id }}')">
-                  <i class="fa-solid fa-trash text-xl"></i>
-                </a>             
+              </td>          
+              <th class="flex justify-center items-center mt-3.5">
+                <a href="{% url 'appointment-add' user.id %}">
+                  <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
+                </a>           
               </th>
             </tr>
             
-            {% endfor %}
+          {% endfor %}
           </tbody>
           
         </table>
+        <div class="flex justify-center mt-4">
+          <nav class="btn-group">
+              {% if user_page_obj.has_previous %}
+              <a href="?user_page=1" class="btn btn-outline btn-sm ">หน้าแรก</a>
+              <a href="?user_page={{ user_page.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+              {% endif %}
+      
+              <span class="btn btn-disabled btn-sm">หน้า {{ user_page_obj.number }} จาก {{ user_page_obj.paginator.num_pages }}</span>
+      
+              {% if user_page_obj.has_next %}
+              <a href="?user_page={{ user_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+              <a href="?user_page={{ user_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+              {% endif %}
+          </nav>
+      </div>
         
       </div>
-
-      
-
-      <!-- Modal ลบ-->
-      <div id="deleteModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-          <h3 class="text-xl font-semibold mb-4">ยืนยันการลบ</h3>
-          <p>คุณต้องการลบการนัดหมายนี้หรือไม่?</p>
-          <form id="deleteForm" method="POST">
-            {% csrf_token %}
-            <div class="mt-4 flex justify-end">
-              <button type="button" class="btn btn-ghost mr-2" onclick="closeDeleteModal()">ยกเลิก</button>
-              <button type="submit" class="btn btn-error">ลบ</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-
-      <div class="flex justify-center mt-4">
-        <nav class="btn-group">
-            {% if page_obj.has_previous %}
-            <a href="?page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-            {% endif %}
-    
-            <span class="btn btn-disabled btn-sm">หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}</span>
-    
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-            {% endif %}
-        </nav>
-     </div>
+    </div>
 </div>
+<!-- นัดหมายทั้งหมด-->
+<div class=" text-lg bg-white p-3 rounded-2xl w-3/7">
+  <div class="ml-3 mt-1 mb-1">
+    <a href="{% url 'appointment-list' %}" class="text-lg text-blue-800">นัดหมายทั้งหมด</a>
+  </div>
+  <table class="table ">
+    <!-- head -->
+    <thead>
+      <tr>
+        <th class="text-center">ชื่อ</th>
+        <th class="text-center">รายการ</th>
+        <th class="text-center">วัน</th>
+        <th class="text-center">เวลา</th>
+        <th class="text-center">สถานะ</th>
+      
+      </tr>
+    </thead>
+    <tbody>
+      {% for apt in aptall_page_obj %}
+      <!-- row 1 -->
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="avatar">
+              <div class="mask mask-squircle h-12 w-12">
+                <img
+                  src="{{apt.user.profile.image.url}}"
+                  alt="รูปโปรไฟล์ของผู้ใช้" />
+              </div>
+            </div>
+            <div>
+              <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
+            </div>
+          </div>
+        </td>
+        <td class="text-center">
+          {% if apt.detail %}
+          <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
+          {% else %}
+          <div class="text-xs">{{apt.treatment}}</div>
+          {% endif %}
+          <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
+        </td>
+        <td>
+          <div class="text-xs">{{apt.date}}</div>
+        </td>
+        <td>
+          <div class="text-xs">{{apt.time_slot}}</div>
+        </td>
+        <td>
+          <div class=" text-center text-xs">{{apt.status}}</div>
+        </td>
+    
+
+        
+      </tr>      
+    {% endfor %}
+    </tbody>
+    
+    
+  </table>
+  <div class="flex justify-center mt-4">
+    <nav class="btn-group">
+        {% if aptall_page_obj.has_previous %}
+        <a href="?aptall_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
+        <a href="?aptall_page={{ aptall_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+        {% endif %}
+
+        <span class="btn btn-disabled btn-sm">หน้า {{ aptall_page_obj.number }} จาก {{ aptall_page_obj.paginator.num_pages }}</span>
+
+        {% if aptall_page_obj.has_next %}
+        <a href="?aptall_page={{ aptall_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+        <a href="?aptall_page={{ aptall_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+        {% endif %}
+    </nav>
+ </div>
+  
+ </div>
+</div>
+
+
+
+
+
 <script>
-  // ลบบบบบ #####
-  function openDeleteModal(appointmentId) {
-    document.getElementById('deleteModal').classList.remove('hidden');
-    document.getElementById('deleteForm').action = `/staff/appointment/delete/${appointmentId}/`; 
-  }
 
-  function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-  }
 
-  // เพิ่ม ######
-  function openAddModal() {
-    document.getElementById('addModal').classList.remove('hidden');
-    document.getElementById('addForm').action = `/staff/appointment/add/`; 
-  }
-
-  function closeAddModal() {
-    document.getElementById('addModal').classList.add('hidden');
-  }
-  /////////
-  function updateTimeSlots() {
+    ///วันเวลา///
+    function updateTimeSlots() {
         var selectedDate = document.getElementById('date').value;
         var selectedDentist = document.getElementById('dentist').value;
         var timeSlotSelect = document.getElementById('time_slot');
@@ -235,5 +287,7 @@
     // เชื่อม Event กับ Date และ Dentist Dropdown
     document.getElementById('date').addEventListener('change', updateTimeSlots);
     document.getElementById('dentist').addEventListener('change', updateTimeSlots);
+
+
 </script>
 {% endblock %}

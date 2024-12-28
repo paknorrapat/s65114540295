@@ -1,6 +1,7 @@
 from django import forms
-from member.models import *
-from .models import *
+from Sparky.models import *
+
+
 
 class AppointmentForm(forms.ModelForm):
     class Meta:
@@ -16,14 +17,12 @@ class AppointmentStatus(forms.ModelForm):
         model = Appointment
         fields = ['user','treatment','dentist','date','time_slot','status']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'time_slot': forms.TimeInput(attrs={'type': 'time'}),
         }
 
 class DentistForm(forms.ModelForm):
     class Meta:
         model = Dentist
-        fields = ['dentistName', 'd_email', 'd_phone', 'workDays', 'startTime', 'endTime']
+        fields = ['user','workDays', 'startTime', 'endTime']
         widgets = {
             'workDays': forms.TextInput(attrs={'placeholder': 'เช่น 1,2,3 (จันทร์,อังคาร,พุธ)'}),
             'startTime': forms.TimeInput(attrs={'type': 'time'}),
@@ -33,4 +32,4 @@ class DentistForm(forms.ModelForm):
 class TreatmentForm(forms.ModelForm):
     class Meta:
         model = Treatment
-        fields = ["treatmentName"]
+        fields = ["treatmentName","price"]

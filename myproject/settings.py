@@ -42,8 +42,9 @@ INSTALLED_APPS = [
     'theme',
     'django_browser_reload',
     'member',
-    'Category',
     'staff',
+    "dentist",
+    "manager",
 ]
 
 AUTH_USER_MODEL ='Sparky.User'

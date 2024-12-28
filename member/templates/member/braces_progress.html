@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block main%}
+<!-- สถานะการจัดฟัน-->
+<div class="mx-4">
+    <div class="bg-white shadow-lg p-4 rounded-2xl w-full mb-4">
+        <div class="ml-3 mt-1 mb-2">
+            <span class="text-blue-800 text-lg">สถานะการจัดฟัน</span>
+        </div> 
+          
+        <div class="space-y-4 p-4">
+            <!-- ขั้นที่ 1: ปรึกษาวางแผน -->
+            <div class="flex items-center gap-4">
+                {% if step1_completed %}
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-base font-medium text-green-600">ขั้นที่ 1: ปรึกษาวางแผนจัดฟัน</span>
+                {% else %}
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray text-lg">
+                    1
+                </div>
+                <span class="text-base font-medium text-gray-500">ขั้นที่ 1: ปรึกษาวางแผนจัดฟัน</span>
+                {% endif %}
+            </div>
+
+            <!-- ขั้นที่ 2: เคลียร์ช่องปาก -->
+            <div class="flex items-center gap-4">
+                {% if step2_completed %}
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-base font-medium text-green-600">ขั้นที่ 2: เคลียร์ช่องปาก</span>
+                {% else %}
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray text-lg">
+                    2
+                </div>
+                <span class="text-base font-medium text-gray-500">ขั้นที่ 2: เคลียร์ช่องปาก</span>
+                {% endif %}
+    
+            </div>
+
+            <!-- ขั้นที่ 3: พิมพ์ปากและเอกซเรย์ -->
+            <div class="flex items-center gap-4">
+                {% if step3_completed %}
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-base font-medium text-green-600">ขั้นที่ 3: พิมพ์ปากและเอกซเรย์</span>
+                {% else %}
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray text-lg">
+                    3
+                </div>
+                <span class="text-base font-medium text-gray-500">ขั้นที่ 3: พิมพ์ปากและเอกซเรย์</span>
+                {% endif %}
+            </div>
+
+            <!-- ขั้นที่ 4: ติดเครื่องมือ -->
+            <div class="flex items-center gap-4">
+                {% if step4_completed %}
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-base font-medium text-green-600">ขั้นที่ 4: ติดเครื่องมือ (ครบแล้ว: {{ step4_count }}/{{ step4_total }})</span>
+                {% else %}
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray text-lg">
+                    4
+                </div>
+                <span class="text-base font-medium text-gray-500">ขั้นที่ 4: ติดเครื่องมือ ({{ step4_count }}/{{ step4_total }})</span>
+                {% endif %}
+            </div>
+
+            <!-- ขั้นที่ 5: ถอดเครื่องมือ -->
+            <div class="flex items-center gap-4">
+                {% if step5_completed %}
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-lg">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="text-base font-medium text-green-600">ขั้นที่ 5: ถอดเครื่องมือ</span>
+                {% else %}
+                <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray text-lg">
+                    5
+                </div>
+                <span class="text-base font-medium text-gray-500">ขั้นที่ 5: ถอดเครื่องมือ</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock%}

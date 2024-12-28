@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block main %}
-<div class="mt-8 flex flex-col justify-center items-center">    
-    <div class="w-1/2 max-w-md">
+<div class="mx-4 mt-8 flex flex-col justify-center items-center">    
+    <div class="w-full">
         <div class=" bg-white p-8 rounded-lg shadow-lg w-full ">
             <h3 class="text-xl font-semibold mb-4">ทันตแพทย์</h3>
             <p>คุณต้องการแก้ไขข้อมูลทันตแพทย์หรือไม่?</p>
@@ -9,14 +9,10 @@
                 {% csrf_token %}
                 <div class="mt-3">
                         <label for="dentistName">ชื่อทันตแพทย์</label><br>
-                        <input type="text" id="dentistName" name="dentistName" value="{{dentist.dentistName}}" class="input input-bordered w-full  my-1" >
+                        <input type="text" id="dentistName" name="dentistName" value="{{dentist.user.title}}{{dentist.user.first_name}} {{dentist.user.last_name}}" class="input input-bordered w-full  my-1" readonly >
+                        <!-- ฟิลด์ hidden สำหรับส่งค่า user.id -->
+                        <input type="hidden" name="user" value="{{ dentist.user.id }}">
 
-                        <label for="d_email">อีเมล</label><br>
-                        <input type="email" id="d_email" name="d_email"  value="{{dentist.d_email}}" required class="input input-bordered w-full  my-1" >
-
-                        <label for="d_phone">เบอร์โทร</label><br>
-                        <input type="text" id="d_phone" name="d_phone" value="{{dentist.d_phone}}" maxlength="10" pattern="\d{10}" required class="input input-bordered w-full  my-1" >
-    
                         <label for="workDays">วันทำงาน</label><br>
                         <div id="workDays" class="mt-2 flex flex-wrap gap-2">
                                 <label class="flex items-center gap-2">

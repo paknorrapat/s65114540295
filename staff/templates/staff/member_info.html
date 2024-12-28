@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block main %}
+<div class=" mx-4 bg-white p-4 rounded-2xl w-full">
+    <div class="ml-3 mt-1">
+      <span class="text-blue-800">ข้อมูลคนไข้</span>
+    </div>
+    <div class="overflow-x-auto p-3">
+      <form method="GET" class="flex items-center space-x-2 mb-4">
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="ค้นหาชื่อคนไข้..."
+          class=" text-sm border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 p-1 w-full"
+          value="{{ request.GET.search }}">
+        <button type="submit" class="text-blue-500">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+
+      <table class="table ">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th >ชื่อ</th>
+            <th class="text-center">ตัวเลือก</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in user_page_obj %}
+          <!-- row 1 -->
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar">
+                  <div class="mask mask-squircle h-12 w-12">
+                    <img
+                      src="{{user.profile.image.url}}"
+                      alt="รูปโปรไฟล์ของผู้ใช้" />
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm">{{user.title}}{{user.first_name}} {{user.last_name}}</div>
+                </div>
+              </div>
+            </td>          
+            <th class="flex justify-center items-center mt-3.5">
+              <a href="{% url 'profile' user.id %}" >
+                <i class="fa-solid fa-id-card-clip text-xl mr-2"></i>
+              </a>
+              <a href="{% url 't-history' user.id %}" >
+                <i class="fa-solid fa-file-medical text-xl mr-2"></i> 
+              </a>
+              <a href="{% url 'braces-progress' user.id%}" >
+                <i class="fa-solid fa-teeth-open text-xl"></i>
+              </a>         
+            </th>
+          </tr>
+          
+        {% endfor %}
+        </tbody>
+        
+      </table>
+      <div class="flex justify-center mt-4">
+        <nav class="btn-group">
+            {% if user_page_obj.has_previous %}
+            <a href="?user_page=1" class="btn btn-outline btn-sm ">หน้าแรก</a>
+            <a href="?user_page={{ user_page.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+            {% endif %}
+    
+            <span class="btn btn-disabled btn-sm">หน้า {{ user_page_obj.number }} จาก {{ user_page_obj.paginator.num_pages }}</span>
+    
+            {% if user_page_obj.has_next %}
+            <a href="?user_page={{ user_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+            <a href="?user_page={{ user_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+            {% endif %}
+        </nav>
+    </div>
+      
+    </div>
+  </div>
+{% endblock%}

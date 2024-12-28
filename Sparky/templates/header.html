@@ -1,81 +1,33 @@
-<div class="flex flex-col w-64 min-h-screen bg-[#7469B6] text-white">
-    {% if user.is_staff %}
-    <div class="p-4 my-3 text-3xl font-bold text-center ">
-      <a href="{% url 'staff-home' %}">SPARKY</a>
-    </div>
-    {% else %}
-    <div class="p-4 my-3 text-3xl font-bold text-center ">
-      <a href="{% url 'member-home' %}">SPARKY</a>
-    </div>
-    {% endif %}
-    <!-- Username Section -->
-    <div class="flex items-center px-4 py-3 space-x-3 bg-[#5a4c92] rounded-lg mx-4 mb-2">
-      {% if  user.profile.image %}
-        <img src="{{ user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้" class="w-10 h-10 rounded-full object-cover">
-      {% else %}
-        <i class="fa-solid fa-user-circle text-3xl"></i>
-      {% endif %}
-      <span class="text-lg font-semibold">{{ user.username }}</span>
-    </div>
-    <nav class="flex-1 p-4 space-y-2  flex flex-col justify-between  ">
-      <div class="space-y-2">
-        <!-- staff -->
-          {% if user.is_staff %}
-            <a href="{% url 'staff-home' %}" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-house text-xl "></i>
-              นัดหมาย
+<!-- Header -->
+<header class="bg-white text-black shadow-lg">
+  <div class="container mx-auto flex items-center justify-between p-4">
+      <!-- Logo -->
+        {% if request.user.is_staff %}
+            <a href="{% url 'staff-home' %}" class="text-2xl font-bold">
+                SPARKY (Staff)
             </a>
-            <a href="{%url 'profile' user.id %}" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-user text-xl mx-1"></i>
-              โปรไฟล์
+        {% elif request.user.is_dentist %}
+            <a href="{% url 'dentist-home' %}" class="text-2xl font-bold">
+                SPARKY (Dentist)
             </a>
-            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-bed text-xl mx-1"></i>
-              คนไข้
+        {% elif request.user.is_manager %}
+            <a href="{% url 'manager-home' %}" class="text-2xl font-bold">
+                SPARKY (Manager)
             </a>
-            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-book-medical text-xl mx-1"></i>
-              การรักษา
+        {% else %}
+            <a href="{% url 'member-home' %}" class="text-2xl font-bold">
+                SPARKY (Member)
             </a>
-            <a href="{% url 'dentist-manage' %}" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-calendar text-xl mx-1"></i>
-              ทันตแพทย์
-            </a>
-            <a href="{% url 'treatment-manage' %}" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-file-medical text-xl mx-1"></i>
-              ประเภทการรักษา
-            </a>
-            <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700">
-              <i class="fa-solid fa-chart-column text-xl mx-1"></i>
-              แดชบอร์ด
-            </a>
-          {% else %}
-          
-          <!-- member -->
-          <a href="{% url 'member-home' %}" class="block py-3 px-4 rounded hover:bg-gray-700">
-            <i class="fa-solid fa-house text-xl "></i>
-            หน้าแรก
-          </a>
-          <a href="{%url 'profile' user.id %}" class="block py-3 px-4 rounded hover:bg-gray-700">
-            <i class="fa-solid fa-user text-xl mx-1"></i>
-            โปรไฟล์
-          </a>
-          <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700">
-            <i class="fa-solid fa-file-medical text-xl mx-1"></i>
-            ประวัติการรักษา
-          </a>
-          <a href="#" class="block py-3 px-4 rounded hover:bg-gray-700">
-            <i class="fa-solid fa-teeth-open text-xl "></i>
-            สถานะการจัดฟัน
-          </a>
-          {% endif %}
-      </div>
-      <a href="{% url 'logout' %}" class="block py-3 px-4 rounded  hover:bg-gray-700 mt-auto">
-        <i class="fa-solid fa-arrow-right-from-bracket text-xl mx-1"></i>
-        ออกจากระบบ
-      </a>
-    </nav>
-      
-  </div>
+        {% endif %}
 
+      <!-- Navigation -->
+      <nav class="flex items-center space-x-4">
+          <span class="text-sm text-gray-700">{{request.user.title}}{{ request.user.first_name }} {{ request.user.last_name }}</span>
+          <img src="{{ request.user.profile.image.url}}" alt="" class="w-10 h-10 rounded-full object-cover">
+      </nav>
   
+  </div>
+</header>
+    
+
+

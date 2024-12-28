@@ -31,10 +31,16 @@ def login(request):
             if user is not None:
                 auth_login(request,user)
                 if user.is_staff:
-                    # messages.success(request,'ยินดีต้อนรับเข้าสู่หน้าแอดมิน')
+                    # Redirect ไปหน้า staff
                     return redirect('staff-home')
+                elif user.is_manager:
+                    # Redirect ไปหน้า manager
+                    return redirect('manager-home')
+                elif user.is_dentist:
+                    # Redirect ไปหน้า dentist
+                    return redirect('dentist-home')
                 else:
-                    # messages.success(request,'ยินดีต้อนรับเข้าสู่หน้าหลัก')
+                    # Redirect ไปหน้า member
                     return redirect('member-home')
             else:
                 messages.error(request,'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')

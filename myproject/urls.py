@@ -24,6 +24,8 @@ urlpatterns = [
     path("",include('Sparky.urls')),
     path("member/",include('member.urls')),
     path("staff/",include('staff.urls')),
+    path("dentist/",include('dentist.urls')),
+    path("manager/",include('manager.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

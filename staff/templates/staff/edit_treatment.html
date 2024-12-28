@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block main %}
-<div class="mt-8 flex flex-col justify-center items-center">    
-    <div class="w-1/3 max-w-md">
+<div class="mx-4 mt-8 flex flex-col justify-center items-center">    
+    <div class="w-full">
         <div class="bg-white p-6 rounded-lg shadow-lg w-full">
           <h3 class="text-xl font-semibold mb-4">ประเภทการรักษา</h3>
           <p>คุณต้องการเพิ่มประเภทการรักษาหรือไม่?</p>
@@ -11,6 +11,9 @@
                       <label for="treatmentName">ชื่อประเภทการรักษา</label><br>
                       <input type="text" id="treatmentName" name="treatmentName"  value="{{treatment.treatmentName}}" required class="input input-bordered w-full  my-1" >
 
+                      <label for="price">ค่าใช้จ่าย</label><br>
+                      <input type="text" id="price" name="price" value="{{treatment.price}}" required class="input input-bordered w-full  my-1" >
+  
                       <div class="mt-4 flex justify-end">
                         <button type="submit" class="btn bg-[#7B42C4] text-white hover:bg-[#7469B6] mr-2">บันทึกประเภทการรักษา</button>
                         <a href="{% url 'treatment-manage' %}" class="btn btn-ghost " >ยกเลิก</a>

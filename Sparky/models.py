@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from .models import *
+from datetime import time
 # Create your models here.
 
 GENDER_CHOICE = (
@@ -16,6 +18,8 @@ BLOOD_TYPE_CHOICES =(
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False,verbose_name='ผนักงานหน้าเคาน์เตอร์')
+    is_dentist = models.BooleanField(default=False,verbose_name='ทันตแพทย์')
+    is_manager = models.BooleanField(default=False,verbose_name='ผู้จัดการ')
     title = models.CharField(max_length=30,verbose_name="คำนำหน้าชื่อ")
 
 class Profile(models.Model):
@@ -41,6 +45,57 @@ class Profile(models.Model):
     def __str__(self) :
         return self.user.first_name +" "+self.user.last_name
 
+class Treatment(models.Model):
+    treatmentName = models.CharField(max_length=100, unique=True,verbose_name="ประเภทการรักษา")
+    price = models.FloatField(null=True, blank=True)
+    is_braces = models.BooleanField(default=False, verbose_name="เป็นการจัดฟันหรือไม่") 
+    createdAt = models.DateTimeField(auto_now_add=True, blank=False)
+    updatedAt = models.DateTimeField(auto_now=True, blank=False)
+
+    def __str__(self):
+        return self.treatmentName
+    
+class Dentist(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    workDays = models.CharField(max_length=50, verbose_name="วันทำงาน", default="1,2,3,4,5")  # วันทำงาน (1=จันทร์, ..., 7=อาทิตย์)
+    startTime = models.TimeField(verbose_name="เวลาเริ่มทำงาน",default=time(9,0))
+    endTime = models.TimeField(verbose_name="เวลาหยุดทำงาน",default=time(18,0))
+    createdAt = models.DateTimeField(auto_now_add=True, blank=False)
+    updatedAt = models.DateTimeField(auto_now=True, blank=False)
+
+    def __str__(self):
+        return self.user.first_name
 
 
+STATUS_CHOICES = [
+        ('รอดำเนินการ', 'รอดำเนินการ'),     # Pending
+        ('สำเร็จ', 'สำเร็จ'),         # Completed
+        ('ไม่สำเร็จ', 'ไม่สำเร็จ'),         # Failed
+    ]
+class Appointment(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    treatment = models.ForeignKey(Treatment,on_delete=models.SET_NULL,null=True,blank=True)
+    dentist = models.ForeignKey(Dentist,on_delete=models.SET_NULL,null=True,blank=True)
+    date = models.DateField(null=True, blank=True)
+    time_slot = models.TimeField(null=True, blank=True)
+    status = models.CharField(default='รอดำเนินการ',choices=STATUS_CHOICES, null=True, blank=False,max_length=50)
+    detail = models.CharField(max_length=100, null=True, blank=True)
+    createdAt = models.DateTimeField(auto_now_add=True, blank=False)
+    updatedAt = models.DateTimeField(auto_now=True, blank=False)
 
+    def __str__(self):
+        user_name = self.user.username if self.user else 'Unknown User'
+        return f'{self.user.first_name} {self.user.last_name} : {self.treatment.treatmentName} on {self.date} at {self.time_slot}'
+
+class TreatmentHistory(models.Model):
+    appointment = models.ForeignKey(Appointment,on_delete=models.SET_NULL,null=True,blank=True)
+    description = models.TextField(verbose_name='รายละเอียดการรักษา')
+    cost = models.FloatField(null=True, blank=True,verbose_name='ค่าใช้จ่าย')
+    status = models.BooleanField(default=True,null=True, blank=False)
+
+    def __str__(self):
+        if self.appointment and self.appointment.user:
+            user_name = f'{self.appointment.user.title}{self.appointment.user.first_name} {self.appointment.user.last_name}'
+        else:
+            user_name = 'Unknown User'
+        return f'{user_name} : {self.appointment.treatment.treatmentName}'
