@@ -88,7 +88,7 @@ class Appointment(models.Model):
         return f'{self.user.first_name} {self.user.last_name} : {self.treatment.treatmentName} on {self.date} at {self.time_slot}'
 
 class TreatmentHistory(models.Model):
-    appointment = models.ForeignKey(Appointment,on_delete=models.SET_NULL,null=True,blank=True)
+    appointment = models.OneToOneField(Appointment,on_delete=models.CASCADE,null=True,blank=True)
     description = models.TextField(verbose_name='รายละเอียดการรักษา')
     cost = models.FloatField(null=True, blank=True,verbose_name='ค่าใช้จ่าย')
     status = models.BooleanField(default=True,null=True, blank=False)

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block main%}
 <!-- ประวัติการรักษา-->
-    <div class="mx-4" >
+    <div class="mr-3" >
       <div class=" bg-white p-4  rounded-2xl w-full mb-4">
         <div class="ml-3 mt-1 mb-1">
           <span class="text-lg text-blue-800">ประวัติการรักษา</span>
@@ -28,7 +28,7 @@
                                 onclick="openHistoryModal(
                                     '{{ history.appointment.user.title }}{{ history.appointment.user.first_name }} {{ history.appointment.user.last_name }}',
                                     '{{ history.appointment.dentist.user.title }}{{ history.appointment.dentist.user.first_name }} {{ history.appointment.dentist.user.last_name }}',
-                                    '{% if history.appointment.detail %}{{ history.appointment.detail }} {% else %}{{ history.appointment.treatment.treatmentName }}'{% endif %},
+                                    '{% if history.appointment.detail %}{{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }} {% else %}{{ history.appointment.treatment.treatmentName }}{% endif %}',
                                     '{{ history.appointment.date }}',
                                     '{{ history.cost }}',
                                     '{{ history.description }}')">
@@ -64,8 +64,8 @@
         
     </div>
 
-      <!-- Modal -->
-      <div id="historyModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
+    <!-- Modal -->
+    <div id="historyModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
             <h3 class="text-lg font-semibold text-blue-800 mb-4">รายละเอียดการรักษา</h3>
             <p><strong>วันที่ทำการรักษา:</strong> <span id="modalDate"></span></p>

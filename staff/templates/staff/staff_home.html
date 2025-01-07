@@ -1,252 +1,271 @@
 {% extends 'base.html' %}
 
 {% block main %}
-<!-- นัดหมายวันนี้-->
-<div class="flex justify-between">
-  <div class="mx-3" >
-    <div class=" bg-white p-4  rounded-2xl w-full mb-4">
-      <div class="ml-3 mt-1 mb-1">
-        <span class=" text-lg text-blue-800">นัดหมายวันนี้</span>
+<div class="flex mb-3">
+  <div class=" mr-3 bg-white p-4  rounded-2xl w-1/4 h-full mb-4  flex flex-col justify-between ">
+      <div class="ml-3 mt-1 mb-1 ">
+        <span class="text-blue-800">จำนวนนัดหมายวันนี้</span>
       </div>
-      <table class="table ">
-        <!-- head -->
-        <thead>
-          <tr>
-            <th class="text-center">ชื่อ</th>
-            <th class="text-center">รายการ</th>
-            <th class="text-center">เวลา</th>
-            <th class="text-center">ตัวเลือก</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for apt in appointment_page_obj %}
-          <!-- row 1 -->
-          <tr>
-            <td>
-              <div class="flex items-center gap-3">
-                <div class="avatar">
-                  <div class="mask mask-squircle h-12 w-12">
-                    <img
-                      src="{{apt.user.profile.image.url}}"
-                      alt="รูปโปรไฟล์ของผู้ใช้" />
-                  </div>
-                </div>
-                <div>
-                  <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
-                </div>
-              </div>
-            </td>
-            <td class="text-center">
-              {% if apt.detail %}
-              <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
-              {% else %}
-              <div class="text-xs">{{apt.treatment}}</div>
-              {% endif %}
-              <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
-            </td>
-            <td>
-              <div class="text-xs">{{apt.time_slot}}</div>
-            </td>
-            <th class="flex justify-center items-center mt-3.5">
-              {% if apt.status == 'รอดำเนินการ' %}
-              <a href="{% url 'appointment-update' apt.id%}">
-                <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
-              </a>
-  
-              {% elif apt.status == 'สำเร็จ' %}
-              <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
-              {% else %} 
-              <i class="fa-regular fa-rectangle-xmark text-xl mr-2 text-red-500"></i>
-              {% endif %}
-            </th>
-
-            
-          </tr>      
-        {% endfor %}
-        </tbody>
-        
-        
-      </table>
-      <div class="flex justify-center mt-4">
-        <nav class="btn-group">
-            {% if appointment_page_obj.has_previous %}
-            <a href="?appointment_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-            <a href="?appointment_page={{ appointment_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-            {% endif %}
-
-            <span class="btn btn-disabled btn-sm">หน้า {{ appointment_page_obj.number }} จาก {{ appointment_page_obj.paginator.num_pages }}</span>
-
-            {% if appointment_page_obj.has_next %}
-            <a href="?appointment_page={{ appointment_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-            <a href="?appointment_page={{ appointment_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-            {% endif %}
-        </nav>
+      <div class="flex-grow flex justify-center items-center mb-5">
+        <h1 class="text-center text-3xl font-bold"><span class="text-green-500">{{success_or_fail_today}} </span>/ {{count_appointment_today}}</h1>
+      </div>
     </div>
+    <div class=" bg-white p-4  rounded-2xl w-1/4 h-full mb-4 flex flex-col justify-between">
+      <div class="ml-3 mt-1 mb-1">
+        <span class="text-blue-800">จำนวนนัดหมายทั้งหมด</span>
+      </div>
+      <div class="flex-grow flex justify-center items-center mb-5">
+        <h1 class="text-center text-3xl font-bold">{{count_appointment_all}}</h1>
+      </div>
+
+    </div>
+  </div>
+<div>
+
+<div class="flex mb-3 ">
+    <!-- นัดหมายวันนี้-->
+    <div class="mr-3" >
+      <div class=" bg-white p-4  rounded-2xl w-full h-full ">
+          <div class="ml-3 mt-1 mb-1">
+            <span class=" text-lg text-blue-800">นัดหมายวันนี้</span>
+          </div>
+          <table class="table ">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th class="text-center">ชื่อ</th>
+                <th class="text-center">รายการ</th>
+                <th class="text-center">เวลา</th>
+                <th class="text-center">ตัวเลือก</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for apt in appointment_page_obj %}
+              <!-- row 1 -->
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="avatar">
+                      <div class="mask mask-squircle h-12 w-12">
+                        <img
+                          src="{{apt.user.profile.image.url}}"
+                          alt="รูปโปรไฟล์ของผู้ใช้" />
+                      </div>
+                    </div>
+                    <div>
+                      <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">
+                  {% if apt.detail %}
+                  <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
+                  {% else %}
+                  <div class="text-xs">{{apt.treatment}}</div>
+                  {% endif %}
+                  <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
+                </td>
+                <td>
+                  <div class="text-xs">{{apt.time_slot}}</div>
+                </td>
+                <th class="flex justify-center items-center mt-3.5">
+                  {% if apt.status == 'รอดำเนินการ' %}
+                  <a href="{% url 'appointment-update' apt.id%}">
+                    <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
+                  </a>
       
+                  {% elif apt.status == 'สำเร็จ' %}
+                  <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
+                  {% else %} 
+                  <i class="fa-regular fa-rectangle-xmark text-xl mr-2 text-red-500"></i>
+                  {% endif %}
+                </th>
+
+                
+              </tr>      
+            {% endfor %}
+            </tbody>
+            
+            
+          </table>
+          <div class="flex justify-center mt-4">
+            <nav class="btn-group">
+                {% if appointment_page_obj.has_previous %}
+                <a href="?appointment_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
+                <a href="?appointment_page={{ appointment_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+                {% endif %}
+
+                <span class="btn btn-disabled btn-sm">หน้า {{ appointment_page_obj.number }} จาก {{ appointment_page_obj.paginator.num_pages }}</span>
+
+                {% if appointment_page_obj.has_next %}
+                <a href="?appointment_page={{ appointment_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+                <a href="?appointment_page={{ appointment_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+                {% endif %}
+            </nav>
+        </div>
+      </div>
     </div>
 
     <!-- เพิ่มนัดหมาย-->
+    <div class="mr-3">
+      <div class=" bg-white p-4 rounded-2xl w-full h-full">
+            <div class="ml-3 mt-1">
+              <span class="text-lg text-blue-800">เพิ่มนัดหมาย</span>
+            </div>
+            <div class="overflow-x-auto p-3">
+              <form method="GET" class="flex items-center space-x-2 mb-4">
+                <input 
+                  type="text" 
+                  name="search" 
+                  placeholder="ค้นหาชื่อคนไข้..."
+                  class=" text-sm border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 p-1 w-full"
+                  value="{{ request.GET.search }}">
+                <button type="submit" class="text-blue-500">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+              </form>
 
-    <div class=" bg-white p-4 rounded-2xl w-full">
-      <div class="ml-3 mt-1">
-        <span class="text-lg text-blue-800">เพิ่มนัดหมาย</span>
-      </div>
-      <div class="overflow-x-auto p-3">
-        <form method="GET" class="flex items-center space-x-2 mb-4">
-          <input 
-            type="text" 
-            name="search" 
-            placeholder="ค้นหาชื่อคนไข้..."
-            class=" text-sm border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 p-1 w-full"
-            value="{{ request.GET.search }}">
-          <button type="submit" class="text-blue-500">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-        </form>
-
-        <table class="table ">
-          <!-- head -->
-          <thead>
-            <tr>
-              <th >ชื่อ</th>
-              <th class="text-center">ตัวเลือก</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for user in user_page_obj %}
-            <!-- row 1 -->
-            <tr>
-              <td>
-                <div class="flex items-center gap-3">
-                  <div class="avatar">
-                    <div class="mask mask-squircle h-12 w-12">
-                      <img
-                        src="{{user.profile.image.url}}"
-                        alt="รูปโปรไฟล์ของผู้ใช้" />
-                    </div>
-                  </div>
-                  <div>
-                    <div class="text-sm">{{user.title}}{{user.first_name}} {{user.last_name}}</div>
-                  </div>
-                </div>
-              </td>          
-              <th class="flex justify-center items-center mt-3.5">
-                <a href="{% url 'appointment-add' user.id %}">
-                  <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
-                </a>           
-              </th>
-            </tr>
+              <table class="table ">
+                <!-- head -->
+                <thead>
+                  <tr>
+                    <th >ชื่อ</th>
+                    <th class="text-center">ตัวเลือก</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in user_page_obj %}
+                  <!-- row 1 -->
+                  <tr>
+                    <td>
+                      <div class="flex items-center gap-3">
+                        <div class="avatar">
+                          <div class="mask mask-squircle h-12 w-12">
+                            <img
+                              src="{{user.profile.image.url}}"
+                              alt="รูปโปรไฟล์ของผู้ใช้" />
+                          </div>
+                        </div>
+                        <div>
+                          <div class="text-sm">{{user.title}}{{user.first_name}} {{user.last_name}}</div>
+                        </div>
+                      </div>
+                    </td>          
+                    <th class="flex justify-center items-center mt-3.5">
+                      <a href="{% url 'appointment-add' user.id %}">
+                        <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
+                      </a>           
+                    </th>
+                  </tr>
+                  
+                {% endfor %}
+                </tbody>
+                
+              </table>
+              <div class="flex justify-center mt-4">
+                <nav class="btn-group">
+                    {% if user_page_obj.has_previous %}
+                    <a href="?user_page=1" class="btn btn-outline btn-sm ">หน้าแรก</a>
+                    <a href="?user_page={{ user_page.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+                    {% endif %}
             
-          {% endfor %}
-          </tbody>
-          
-        </table>
-        <div class="flex justify-center mt-4">
-          <nav class="btn-group">
-              {% if user_page_obj.has_previous %}
-              <a href="?user_page=1" class="btn btn-outline btn-sm ">หน้าแรก</a>
-              <a href="?user_page={{ user_page.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-              {% endif %}
-      
-              <span class="btn btn-disabled btn-sm">หน้า {{ user_page_obj.number }} จาก {{ user_page_obj.paginator.num_pages }}</span>
-      
-              {% if user_page_obj.has_next %}
-              <a href="?user_page={{ user_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-              <a href="?user_page={{ user_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-              {% endif %}
-          </nav>
-      </div>
-        
+                    <span class="btn btn-disabled btn-sm">หน้า {{ user_page_obj.number }} จาก {{ user_page_obj.paginator.num_pages }}</span>
+            
+                    {% if user_page_obj.has_next %}
+                    <a href="?user_page={{ user_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+                    <a href="?user_page={{ user_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+                    {% endif %}
+                </nav>
+              </div>
+
+            </div>      
       </div>
     </div>
 </div>
+
 <!-- นัดหมายทั้งหมด-->
-<div class=" text-lg bg-white p-3 rounded-2xl w-3/7">
-  <div class="ml-3 mt-1 mb-1">
-    <a href="{% url 'appointment-list' %}" class="text-lg text-blue-800">นัดหมายทั้งหมด</a>
-  </div>
-  <table class="table ">
-    <!-- head -->
-    <thead>
-      <tr>
-        <th class="text-center">ชื่อ</th>
-        <th class="text-center">รายการ</th>
-        <th class="text-center">วัน</th>
-        <th class="text-center">เวลา</th>
-        <th class="text-center">สถานะ</th>
-      
-      </tr>
-    </thead>
-    <tbody>
-      {% for apt in aptall_page_obj %}
-      <!-- row 1 -->
-      <tr>
-        <td>
-          <div class="flex items-center gap-3">
-            <div class="avatar">
-              <div class="mask mask-squircle h-12 w-12">
-                <img
-                  src="{{apt.user.profile.image.url}}"
-                  alt="รูปโปรไฟล์ของผู้ใช้" />
+<div class="mr-3">
+  <div class=" text-lg bg-white p-3 rounded-2xl w-full">
+    <div class="ml-3 mt-1 mb-1">
+      <a href="{% url 'appointment-list' %}" class="text-lg text-blue-800">นัดหมายทั้งหมด</a>
+    </div>
+    <table class="table ">
+      <!-- head -->
+      <thead>
+        <tr>
+          <th class="text-center">ชื่อ</th>
+          <th class="text-center">รายการ</th>
+          <th class="text-center">วัน</th>
+          <th class="text-center">เวลา</th>
+          <th class="text-center">สถานะ</th>
+        
+        </tr>
+      </thead>
+      <tbody>
+        {% for apt in aptall_page_obj %}
+        <!-- row 1 -->
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <div class="avatar">
+                <div class="mask mask-squircle h-12 w-12">
+                  <img
+                    src="{{apt.user.profile.image.url}}"
+                    alt="รูปโปรไฟล์ของผู้ใช้" />
+                </div>
+              </div>
+              <div>
+                <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
               </div>
             </div>
-            <div>
-              <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
-            </div>
-          </div>
-        </td>
-        <td class="text-center">
-          {% if apt.detail %}
-          <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
-          {% else %}
-          <div class="text-xs">{{apt.treatment}}</div>
+          </td>
+          <td class="text-center">
+            {% if apt.detail %}
+            <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
+            {% else %}
+            <div class="text-xs">{{apt.treatment}}</div>
+            {% endif %}
+            <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
+          </td>
+          <td>
+            <div class="text-xs">{{apt.date}}</div>
+          </td>
+          <td>
+            <div class="text-xs">{{apt.time_slot}}</div>
+          </td>
+          <td>
+            <div class=" text-center text-xs">{{apt.status}}</div>
+          </td>
+
+          
+        </tr>      
+      {% endfor %}
+      </tbody>
+      
+      
+    </table>
+    <div class="flex justify-center mt-4">
+      <nav class="btn-group">
+          {% if aptall_page_obj.has_previous %}
+          <a href="?aptall_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
+          <a href="?aptall_page={{ aptall_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
           {% endif %}
-          <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
-        </td>
-        <td>
-          <div class="text-xs">{{apt.date}}</div>
-        </td>
-        <td>
-          <div class="text-xs">{{apt.time_slot}}</div>
-        </td>
-        <td>
-          <div class=" text-center text-xs">{{apt.status}}</div>
-        </td>
-    
 
-        
-      </tr>      
-    {% endfor %}
-    </tbody>
-    
-    
-  </table>
-  <div class="flex justify-center mt-4">
-    <nav class="btn-group">
-        {% if aptall_page_obj.has_previous %}
-        <a href="?aptall_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-        <a href="?aptall_page={{ aptall_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-        {% endif %}
+          <span class="btn btn-disabled btn-sm">หน้า {{ aptall_page_obj.number }} จาก {{ aptall_page_obj.paginator.num_pages }}</span>
 
-        <span class="btn btn-disabled btn-sm">หน้า {{ aptall_page_obj.number }} จาก {{ aptall_page_obj.paginator.num_pages }}</span>
-
-        {% if aptall_page_obj.has_next %}
-        <a href="?aptall_page={{ aptall_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-        <a href="?aptall_page={{ aptall_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-        {% endif %}
-    </nav>
- </div>
-  
- </div>
+          {% if aptall_page_obj.has_next %}
+          <a href="?aptall_page={{ aptall_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+          <a href="?aptall_page={{ aptall_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+          {% endif %}
+      </nav>
+    </div>
+    
+  </div>
 </div>
 
 
-
-
-
 <script>
-
-
+  
     ///วันเวลา///
     function updateTimeSlots() {
         var selectedDate = document.getElementById('date').value;

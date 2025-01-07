@@ -6,8 +6,8 @@ from datetime import datetime,date,timedelta
 import json
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.db.models import Q
-
+from django.db.models import Q,Sum
+from django.utils.timezone import now
 # Create your views here.
 def member_home(request):
     search = request.GET.get("search","")
@@ -24,13 +24,17 @@ def member_home(request):
 
     treatments = Treatment.objects.all()
     
-    appointments = Appointment.objects.filter(user = request.user).order_by('date','time_slot')
+    appointments = Appointment.objects.filter(user = request.user)
 
     treatment_history = TreatmentHistory.objects.all()
     
     # ฟิลเตอร์นัดหมายที่มีวันที่ตรงกับวันนี้ 
     today = timezone.now().date()
     appointment_today = Appointment.objects.filter(user = request.user,date=today).order_by('time_slot')
+
+    count_appointment_all =appointments.count()
+    count_appointment_today =appointment_today.count()
+    success_or_fail_today =appointment_today.filter(Q(status="สำเร็จ") | Q(status="ไม่สำเร็จ")).count()
 
     # pagination
     paginator = Paginator(appointment_today,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
@@ -43,7 +47,7 @@ def member_home(request):
     user_page_obj = paginator2.get_page(user_page_number)
 
     # pagination 3
-    paginator3 = Paginator(appointments,12) # แบ่งเป็นหน้า 12 รายการต่อหน้า
+    paginator3 = Paginator(appointments,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
     aptall_page_number = request.GET.get('aptall_page')
     aptall_page_obj = paginator3.get_page(aptall_page_number)
 
@@ -54,8 +58,10 @@ def member_home(request):
         'user_page_obj': user_page_obj,
         'dentists':dentists,
         'treatments':treatments,
-        # 'users':users,
         'treatment_history':treatment_history,
+        'count_appointment_today': count_appointment_today,
+        "success_or_fail_today":success_or_fail_today,
+        "count_appointment_all":count_appointment_all,
     })
 
 def get_day_name(day_numbers):
@@ -80,6 +86,14 @@ def t_history(request,user_id):
 
 def braces_progress(request,user_id):
     treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id)
+    braces = treatment_history.filter(appointment__treatment__is_braces=True)
+
+     # pagination
+    paginator = Paginator(braces,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # คำนวณค่าใช้จ่ายทั้งหมดสำหรับการจัดฟัน
+    total_cost = treatment_history.filter(appointment__treatment__is_braces=True).aggregate(total=Sum('cost'))['total'] or 0
 
     # ตรวจสอบสถานะของ "ปรึกษาวางแผนจัดฟัน"
     step1_completed = treatment_history.filter(
@@ -108,6 +122,7 @@ def braces_progress(request,user_id):
         appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True
     ).exists()
 
+    
     return render(request,"member/braces_progress.html",{"treatment_history": treatment_history,
                                                          "step1_completed": step1_completed,
                                                          "step2_completed": step2_completed,
@@ -115,7 +130,10 @@ def braces_progress(request,user_id):
                                                          "step4_completed": step4_completed,
                                                          "step4_count": step4_count,
                                                          "step4_total": step4_total,
-                                                         "step5_completed": step5_completed,})
+                                                         "step5_completed": step5_completed,
+                                                         "total_cost":total_cost,
+                                                         "braces":braces,
+                                                         'page_obj':page_obj,})
 
 
 def delete_appointment_member(request,id):
@@ -142,8 +160,6 @@ def appointment_view(request,dentist_id):
     
     return render(request,'appointment/appointment_form.html',{'form':form,'dentist':dentist,'treatments':treatments})
 
-def appointment_success_view(request):
-    return render(request,'appointment/appointment_success.html')
 
 def get_time_slots(request):
     date_str = request.GET.get('date')
@@ -180,7 +196,8 @@ def get_time_slots(request):
     return JsonResponse({'slots': available_slots})
 
 def calendar_view(request):
-    appointments = Appointment.objects.all().values('date', 'time_slot', 'treatment__treatmentName')
+    appointments = Appointment.objects.all().values('date', 'time_slot', 'treatment__treatmentName','dentist__user__title','dentist__user__first_name', 
+        'dentist__user__last_name')
     events = []
     
     for appointment in appointments:
@@ -188,7 +205,7 @@ def calendar_view(request):
         if appointment['time_slot']:
             # สร้าง start โดยไม่เพิ่ม :00 ที่เกิน
             events.append({
-                'title': f'{appointment["treatment__treatmentName"]} ',
+                'title': f'{appointment["treatment__treatmentName"]} : {appointment["dentist__user__title"]}{appointment["dentist__user__first_name"]} {appointment["dentist__user__last_name"]}',
                 'start': f'{appointment["date"]}T{appointment["time_slot"]}', 
                 'allDay': False,
             })
@@ -209,7 +226,7 @@ def select_appointment_date(request, appointment_id):
         appointment.status = 'รอดำเนินการ'  # เปลี่ยนสถานะเป็นยืนยัน
         appointment.save()
 
-        return redirect('member-home')  # ไปยังหน้ารายการนัดหมายของ Member
+        return redirect('appointment-all')  # ไปยังหน้ารายการนัดหมายของ Member
 
     return render(request, 'member/select_appointment_date.html', {
         'appointment': appointment
@@ -219,8 +236,8 @@ def delete_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id=id)
     if request.method == 'POST':
         appointment.delete()
-        return redirect('member-home')
-    return redirect('member-home')
+        return redirect('appointment-all')
+    return redirect('appointment-all')
 
 def edit_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id = id)
@@ -230,8 +247,26 @@ def edit_appointment_member(request,id):
         form = AppointmentForm(request.POST,instance=appointment)
         if form.is_valid():
             form.save()
-            return redirect('member-home')
+            return redirect('appointment-all')
         else:
             form = AppointmentForm(instance=appointment)
     return render(request,'member/edit_appointment_member.html',{'appointment':appointment,'dentists':dentists,
         'treatments':treatments,})
+
+def appointment_all(request):
+    dentists = Dentist.objects.all() 
+    treatments = Treatment.objects.all()
+    appointments = Appointment.objects.filter(user = request.user)
+
+    today = now().date()
+    # pagination
+    paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request,"member/appointment_all.html",{
+                                                         "appointments":appointments,
+                                                         "page_obj":page_obj,                                       
+                                                         'dentists':dentists,
+                                                         'treatments':treatments,
+                                                         'today': today,})

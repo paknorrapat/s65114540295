@@ -22,23 +22,27 @@ def staff_home(request):
     appointments = Appointment.objects.all()
 
     treatment_history = TreatmentHistory.objects.all()
-    
+
     # ฟิลเตอร์นัดหมายที่มีวันที่ตรงกับวันนี้ 
     today = timezone.now().date()
     appointment_today = Appointment.objects.filter(date=today).order_by('time_slot')
 
+    count_appointment_all =appointments.count()
+    count_appointment_today =appointment_today.count()
+    success_or_fail_today =appointment_today.filter(Q(status="สำเร็จ") | Q(status="ไม่สำเร็จ")).count()
+
     # pagination
-    paginator = Paginator(appointment_today,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
+    paginator = Paginator(appointment_today,6) # แบ่งเป็นหน้า 6 รายการต่อหน้า
     appointment_page_number = request.GET.get('appointment_page')
     appointment_page_obj = paginator.get_page(appointment_page_number)
 
-    # pagination 2
+    # pagination 2 add+
     paginator2 = Paginator(users,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
     user_page_number = request.GET.get('user_page')
     user_page_obj = paginator2.get_page(user_page_number)
 
     # pagination 3
-    paginator3 = Paginator(appointments,12) # แบ่งเป็นหน้า 12 รายการต่อหน้า
+    paginator3 = Paginator(appointments,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
     aptall_page_number = request.GET.get('aptall_page')
     aptall_page_obj = paginator3.get_page(aptall_page_number)
 
@@ -52,6 +56,9 @@ def staff_home(request):
         'treatments':treatments,
         'users':users,
         'treatment_history':treatment_history,
+        'count_appointment_today': count_appointment_today,
+        "success_or_fail_today":success_or_fail_today,
+        "count_appointment_all":count_appointment_all
         })
 
 
@@ -121,9 +128,13 @@ def add_appointment(request,user_id):
 
              # ตรวจสอบว่าการรักษาคือ "ติดเครื่องมือ"
             if appointment.treatment.treatmentName == "ติดเครื่องมือ":
-                # สร้างนัดหมาย 30 รายการ
+                # กำหนดรายละเอียดให้กับ appointment แรก
+                appointment.detail = "ครั้งที่ 1"
+                appointment.status = "รอการนัดหมาย"
+                appointment.save()
+                # สร้างนัดหมาย 29 รายการ
                 appointments = []
-                for i in range(1, 31):  # ตั้งแต่ 1 ถึง 30
+                for i in range(2, 31):  # ตั้งแต่ 2 ถึง 30
                     appointments.append(Appointment(
                         user=user,
                         treatment=appointment.treatment,
@@ -165,39 +176,7 @@ def update_appointment(request,appointment_id):
     return render(request,'staff/edit_appointment.html',{'appointment':appointment,'dentists':dentists,
         'treatments':treatments,})
 
-def add_braces_appointment(request):
-    dentists = Dentist.objects.all() 
-    treatments = Treatment.objects.all()
-    users = User.objects.all()
-    if request.method == 'POST':
-        form = AppointmentForm(request.POST)
-        if form.is_valid():
-            appointments_data = form.save(commit=False)
 
-            #สร้างนัดหมาย 30 รายการ
-            appointments = []
-            for i in range(1, 31):  # ตั้งแต่ 1 ถึง 30
-                    appointment = Appointment(
-                        user=appointments_data.user,
-                        treatment=appointments_data.treatment,
-                        dentist=appointments_data.dentist,
-                        date=None,  # ยังไม่ได้เลือกวัน
-                        time_slot=None,  # ยังไม่ได้เลือกเวลา
-                        status='Pending Selection',  # รอเลือกวัน/เวลา
-                        detail=f'ครั้งที่ {i}'  # กำหนดชื่อเป็น "ครั้งที่ i"
-                    )
-                    appointments.append(appointment)
-            
-            # บันทึกในฐานข้อมูล
-            Appointment.objects.bulk_create(appointments)
-            return redirect('staff-home')
-    else:
-        form = AppointmentForm()
-    return render(request,'staff/add_braces_appointment.html',{
-        'form':form,
-        'dentists':dentists,
-        'treatments':treatments,
-        'users':users,})
 
 def dentist_manage(request): 
     users = User.objects.filter(is_dentist=True, dentist__workDays__isnull=False).exclude(dentist__workDays='')

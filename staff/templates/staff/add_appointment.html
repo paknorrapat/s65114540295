@@ -1,20 +1,17 @@
 {% extends 'base.html' %}
 {% block main %}
-<div class="mx-4">
+<div class="mr-3">
     <div class="bg-white p-4 rounded-2xl w-full mb-4 shadow-lg">
         <!-- ส่วนหัว -->
         <div class="flex items-center mb-4 ml-2 mt-1">
             <h2 class="text-lg  text-blue-800">เพิ่มนัดหมาย</h2>
-              <a  class="ml-2" href="#">
-                <i class="fa-solid fa-user-plus"></i>
-              </a>
         </div>
 
         <!-- แสดงสถานะการจัดฟัน -->
         <div class="flex">
             <!-- ด้านซ้าย: สถานะการจัดฟัน -->
             <div class="mr-10 w-full bg-gray-100 p-6 rounded-l-lg">
-                <h3 class="text-lg  text-blue-800 mb-4">สถานะการจัดฟัน</h3>
+                <h3 class="text-base text-blue-800 mb-4">สถานะการจัดฟัน</h3>
                     <div class="space-y-4">
                         <!-- ขั้นที่ 1: ปรึกษาวางแผน -->
                         <div class="flex items-center gap-4">
@@ -97,7 +94,7 @@
 
             <!-- ด้านขวา: ฟอร์มนัดหมาย -->
             <div class="w-full p-6">
-                <h3 class="text-lg  text-blue-800 mb-4">นัดหมาย</h3>
+                <h3 class="text-base  text-blue-800 mb-4">นัดหมาย</h3>
                 <form id="addForm" method="POST">
                     {% csrf_token %}
                     <div class="space-y-4">

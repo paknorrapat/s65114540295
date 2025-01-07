@@ -7,8 +7,7 @@ urlpatterns = [
     path("appointment/delete/<int:id>/",delete_appointment,name="appointment-delete"),
     path("appointment/add/<int:user_id>/",add_appointment,name="appointment-add"),
     path('appointment/update/<int:appointment_id>/',update_appointment, name='appointment-update'),
-    path("appointment/add_braces/",add_braces_appointment,name="appointment-add-braces"),
-
+    
     path("dentist_manage/",dentist_manage,name="dentist-manage"),
     path("add_dentist/",add_dentist,name="add-dentist"),
     path("delete_dentist/<int:dentist_id>/",delete_dentist,name="delete-dentist"),
