@@ -267,6 +267,7 @@ def delete_treatment(request,treatment_id):
 def edit_treatment(request,treatment_id):
     treatment = get_object_or_404(Treatment,id=treatment_id)
     if request.method == "POST" :
+        print(request.POST)
         form = TreatmentForm(request.POST,instance = treatment)
         if form.is_valid():
             form.save()
@@ -276,7 +277,7 @@ def edit_treatment(request,treatment_id):
 def member_info(request):
     search = request.GET.get("search","")
     if search:
-        users = User.objects.filter(first_name__icontains = search,is_dentist=False,is_manager=False,is_staff=False)
+        users = User.objects.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search),is_dentist=False,is_manager=False,is_staff=False)
     else :
         users = User.objects.filter(is_dentist=False,is_manager=False,is_staff=False)
 

@@ -95,6 +95,14 @@ def braces_progress(request,user_id):
     # คำนวณค่าใช้จ่ายทั้งหมดสำหรับการจัดฟัน
     total_cost = treatment_history.filter(appointment__treatment__is_braces=True).aggregate(total=Sum('cost'))['total'] or 0
 
+    # ค่าใช้จ่ายของ "เคลียร์ช่องปาก"
+    clear_cost = treatment_history.filter(
+        appointment__treatment__treatmentName='เคลียร์ช่องปาก'
+    ).aggregate(total=Sum('cost'))['total'] or 0
+
+    max_cost = 40000 + clear_cost # ค่าใช้จ่ายรวมทั้งหมด
+    percentage_paid = min((total_cost / max_cost) * 100, 100)  # จำกัดไม่เกิน 100%
+
     # ตรวจสอบสถานะของ "ปรึกษาวางแผนจัดฟัน"
     step1_completed = treatment_history.filter(
         appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True
@@ -133,7 +141,10 @@ def braces_progress(request,user_id):
                                                          "step5_completed": step5_completed,
                                                          "total_cost":total_cost,
                                                          "braces":braces,
-                                                         'page_obj':page_obj,})
+                                                         'page_obj':page_obj,
+                                                         "percentage_paid": round(percentage_paid, 2),
+                                                         "max_cost": max_cost,
+                                                         })
 
 
 def delete_appointment_member(request,id):

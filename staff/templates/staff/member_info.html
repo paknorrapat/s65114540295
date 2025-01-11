@@ -22,8 +22,11 @@
           <!-- head -->
           <thead>
             <tr>
-              <th >ชื่อ</th>
-              <th class="text-center">ตัวเลือก</th>
+              <th class="text-center">ชื่อ-นามสกุล</th>
+              <th class="text-center">ชื่อผู้ใช้งาน</th>
+              <th class="text-center">ข้อมูลส่วนตัว</th>
+              <th class="text-center">ประวัติการรักษา</th>
+              <th class="text-center">สถานะการจัดฟัน</th>
             </tr>
           </thead>
           <tbody>
@@ -43,17 +46,25 @@
                     <div class="text-sm">{{user.title}}{{user.first_name}} {{user.last_name}}</div>
                   </div>
                 </div>
-              </td>          
-              <th class="flex justify-center items-center mt-3.5">
+              </td>
+              <th class="text-center">
+                {{user.username}}
+              </th>          
+              <th class="text-center">
                 <a href="{% url 'profile' user.id %}" >
-                  <i class="fa-solid fa-id-card-clip text-xl mr-2"></i>
+                  <i class="fa-solid fa-id-card text-xl"></i>
                 </a>
+        
+              </th>
+              <th class="text-center">
                 <a href="{% url 't-history' user.id %}" >
-                  <i class="fa-solid fa-file-medical text-xl mr-2"></i> 
+                  <i class="fa-solid fa-file-medical text-xl"></i>
                 </a>
-                <a href="{% url 'braces-progress' user.id%}" >
+              </th>
+              <th class="text-center">
+                <a href="{% url 'braces-progress' user.id%}">
                   <i class="fa-solid fa-teeth-open text-xl"></i>
-                </a>         
+                </a>
               </th>
             </tr>
             

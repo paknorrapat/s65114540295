@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-
+{% load humanize %}
 {% block main %}
 
   <div class="mr-3" >
     <div class=" bg-white p-4  rounded-2xl w-full mb-4">
       <div class="ml-3 mt-1 mb-1">
         <span class="text-lg text-blue-800">ประเภทการรักษา</span>
-        <a  class="ml-2" href="#" onclick="openAddModal()">
-          <i class="fa-solid fa-user-plus"></i>
+        <a  class="ml-1" href="#" onclick="openAddModal()">
+          <i class="fa-solid fa-plus"></i>
         </a>
       </div>
       <table class="table ">
@@ -27,7 +27,7 @@
               <div class="text-sm">{{treatment.treatmentName}}</div>
             </td>
             <td class="text-center">
-              <div class="text-xs">{{treatment.price}} บาท</div>
+              <div class="text-xs">{{treatment.price|floatformat:0|intcomma}} บาท</div>
             </td>
             <th class="flex justify-center items-center mt-3.5">
               <a href="{% url 'edit-treatment' treatment.id %}">

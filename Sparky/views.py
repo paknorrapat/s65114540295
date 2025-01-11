@@ -35,7 +35,7 @@ def login(request):
                     return redirect('staff-home')
                 elif user.is_manager:
                     # Redirect ไปหน้า manager
-                    return redirect('manager-home')
+                    return redirect('dashboard')
                 elif user.is_dentist:
                     # Redirect ไปหน้า dentist
                     return redirect('dentist-home')

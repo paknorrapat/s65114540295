@@ -85,7 +85,9 @@ class Appointment(models.Model):
 
     def __str__(self):
         user_name = self.user.username if self.user else 'Unknown User'
-        return f'{self.user.first_name} {self.user.last_name} : {self.treatment.treatmentName} on {self.date} at {self.time_slot}'
+        treatment_name = self.treatment.treatmentName if self.treatment else 'No Treatment'
+        return f'{self.user.first_name if self.user else "Unknown"} {self.user.last_name if self.user else ""} : {treatment_name} on {self.date} at {self.time_slot}'
+
 
 class TreatmentHistory(models.Model):
     appointment = models.OneToOneField(Appointment,on_delete=models.CASCADE,null=True,blank=True)
@@ -94,8 +96,13 @@ class TreatmentHistory(models.Model):
     status = models.BooleanField(default=True,null=True, blank=False)
 
     def __str__(self):
+        # ตรวจสอบว่า appointment และ user มีค่าหรือไม่
         if self.appointment and self.appointment.user:
             user_name = f'{self.appointment.user.title}{self.appointment.user.first_name} {self.appointment.user.last_name}'
         else:
             user_name = 'Unknown User'
-        return f'{user_name} : {self.appointment.treatment.treatmentName}'
+
+        # ตรวจสอบว่า treatment มีค่าหรือไม่
+        treatment_name = self.appointment.treatment.treatmentName if self.appointment and self.appointment.treatment else 'No Treatment'
+
+        return f'{user_name} : {treatment_name}'

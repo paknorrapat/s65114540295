@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'staff',
     "dentist",
     "manager",
+    "django.contrib.humanize",
 ]
 
 AUTH_USER_MODEL ='Sparky.User'

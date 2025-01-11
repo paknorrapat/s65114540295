@@ -30,7 +30,7 @@
       <!-- head -->
       <thead>
         <tr>
-          <th class="text-center">ชื่อ</th>
+          <th class="text-center">ชื่อ-นามสกุล</th>
           <th class="text-center">รายการ</th>
           <th class="text-center">เวลา</th>
           <th class="text-center">ตัวเลือก</th>
@@ -63,7 +63,7 @@
             <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
           </td>
           <td>
-            <div class="text-xs">{{apt.time_slot}}</div>
+            <div class="text-xs text-center">{{apt.time_slot}}</div>
           </td>
           <th class="flex justify-center items-center mt-3.5">
             {% if apt.status == 'ไม่สำเร็จ' %}
@@ -113,7 +113,7 @@
       <!-- head -->
       <thead>
         <tr>
-          <th class="text-center">ชื่อ</th>
+          <th class="text-center">ชื่อ-นามสกุล</th>
           <th class="text-center">รายการ</th>
           <th class="text-center">วัน</th>
           <th class="text-center">เวลา</th>
@@ -148,10 +148,10 @@
             <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
           </td>
           <td>
-            <div class="text-xs">{{apt.date}}</div>
+            <div class="text-xs text-center">{{apt.date}}</div>
           </td>
           <td>
-            <div class="text-xs">{{apt.time_slot}}</div>
+            <div class="text-xs text-center">{{apt.time_slot}}</div>
           </td>
           <td>
             <div class=" text-center text-xs">{{apt.status}}</div>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize%}
 {% block main%}
 <!-- ประวัติการรักษา-->
     <div class="mr-3" >
@@ -30,7 +31,7 @@
                                     '{{ history.appointment.dentist.user.title }}{{ history.appointment.dentist.user.first_name }} {{ history.appointment.dentist.user.last_name }}',
                                     '{% if history.appointment.detail %}{{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }} {% else %}{{ history.appointment.treatment.treatmentName }}{% endif %}',
                                     '{{ history.appointment.date }}',
-                                    '{{ history.cost }}',
+                                    '{{ history.cost|floatformat:0|intcomma  }}',
                                     '{{ history.description }}')">
                                     <i class="fa-solid fa-circle-chevron-right text-xl text-blue-800"></i>
                                 </a>

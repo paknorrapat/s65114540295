@@ -30,7 +30,7 @@
       <!-- head -->
       <thead>
         <tr>
-          <th class="text-center">ชื่อ</th>
+          <th class="text-center">ชื่อ-นามสกุล</th>
           <th class="text-center">รายการ</th>
           <th class="text-center">เวลา</th>
           <th class="text-center">ตัวเลือก</th>
@@ -63,7 +63,7 @@
             <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
           </td>
           <td>
-            <div class="text-xs">{{apt.time_slot}}</div>
+            <div class="text-xs text-center">{{apt.time_slot}}</div>
           </td>
           <th class="flex justify-center items-center mt-3.5">
               {% if apt.treatmenthistory.status %}
@@ -71,7 +71,7 @@
               {% elif apt.status == 'สำเร็จ' %}
               <a href="#" onclick="openAddModal('{{ apt.user.id }}', '{{ apt.user.title }}{{ apt.user.first_name }} {{ apt.user.last_name }}',
               '{{ apt.dentist.user.title }}{{ apt.dentist.user.first_name }} {{ apt.dentist.user.last_name }}',
-              '{{apt.treatment.treatmentName}}',
+              '{% if apt.detail %}{{ apt.detail }} {{ apt.treatment.treatmentName }}{% else %}{{ apt.treatment.treatmentName }}{% endif %}',
               '{{apt.treatment.price}}',
               '{{apt.id}}')">
                   <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
@@ -112,7 +112,7 @@
       <!-- head -->
       <thead>
         <tr>
-          <th class="text-center">ชื่อ</th>
+          <th class="text-center">ชื่อ-นามสกุล</th>
           <th class="text-center">รายการ</th>
           <th class="text-center">วัน</th>
           <th class="text-center">เวลา</th>
@@ -146,10 +146,10 @@
             <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
           </td>
           <td>
-            <div class="text-xs">{{apt.date}}</div>
+            <div class="text-xs text-center">{{apt.date}}</div>
           </td>
           <td>
-            <div class="text-xs">{{apt.time_slot}}</div>
+            <div class="text-xs text-center">{{apt.time_slot}}</div>
           </td>
           <th class="flex justify-center items-center mt-3.5">
               {% if apt.treatmenthistory.status %}
@@ -157,8 +157,8 @@
               {% elif apt.status == 'สำเร็จ' %}
               <a href="#" onclick="openAddModal('{{ apt.user.id }}', '{{ apt.user.title }}{{ apt.user.first_name }} {{ apt.user.last_name }}',
               '{{ apt.dentist.user.title }}{{ apt.dentist.user.first_name }} {{ apt.dentist.user.last_name }}',
-              '{{apt.treatment.treatmentName}}',
-              '{{apt.treatment.price}}',
+              '{% if apt.detail %}{{ apt.detail }} {{ apt.treatment.treatmentName }}{% else %}{{ apt.treatment.treatmentName }}{% endif %}',
+              '{{apt.treatment.price }}',
               '{{apt.id}}')">
                   <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
               </a>

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block main%}
 <!-- สถานะการจัดฟัน-->
-<div class="flex ">
+<div class="flex mr-3">
     <div class="bg-white shadow-lg p-4 rounded-2xl w-full mb-4">
         <div class="ml-3 mt-1 mb-2">
             <span class="text-blue-800 text-lg">สถานะการจัดฟัน</span>
@@ -85,51 +86,91 @@
             </div>
         </div>
     </div>
-    
-    <div class="bg-white shadow-lg p-4 rounded-2xl w-full mb-4 ml-3 mr-3">
-        <div class="ml-3 mt-1 mb-2">
-            <span class="text-blue-800 text-lg">ค่าใช้จ่ายทั้งหมด</span>
-        </div>
-        <p class="text-lgtext-black text-center font-extrabold">รวม {{total_cost|floatformat:0}} บาท</p>
 
-            <div class=" container mx-auto p-4">
-                  <div class="flex flex-col gap-4">
-                      {% for history in page_obj %}
-                      <div class="bg-white shadow-base rounded-lg p-5 border-2  ">
-                          <div class="flex justify-between items-center">
-                              {% if history.appointment.detail%}
-                              <h3 class="text-sm  text-blue-800">
-                                  {{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }}
-                              </h3>
-                              {% else %}
-                              <h3 class="text-sm  text-blue-800">
-                                 {{ history.appointment.treatment.treatmentName }}
-                              </h3>
-                              {% endif %}
-                              
-                              <div class="ml-4 text-right">
-                                  <p class="text-xs text-gray-700">
-                                      วันที่ทำการรักษา {{ history.appointment.date }}
-                                      <a class="ml-2 "  href="javascript:void(0);" 
-                                      onclick="openHistoryModal(
-                                          '{{ history.appointment.user.title }}{{ history.appointment.user.first_name }} {{ history.appointment.user.last_name }}',
-                                          '{{ history.appointment.dentist.user.title }}{{ history.appointment.dentist.user.first_name }} {{ history.appointment.dentist.user.last_name }}',
-                                          '{% if history.appointment.detail %}{{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }} {% else %}{{ history.appointment.treatment.treatmentName }} {% endif %}',
-                                          '{{ history.appointment.date }}',
-                                          '{{ history.cost }}',
-                                          '{{ history.description }}')">
-                                          <i class="fa-solid fa-circle-chevron-right text-xl text-blue-800"></i>
-                                      </a>
-                                  </p>
-                              </div>
-                          </div>
-                          
-                      </div>
-                      {% empty %}
-                      <p class="text-center text-gray-500">ไม่มีข้อมูลการรักษา</p>
-                      {% endfor %}
-                  </div>
-              
+    <div class="ml-3 bg-white shadow-lg p-4 rounded-2xl w-full mb-4">
+        <div class="ml-3 mt-1 mb-2">
+            <span class="text-blue-800 text-lg">ค่าใช้จ่าย</span>
+        </div> 
+        <p class="text-center text-base">รวม {{ max_cost|floatformat:0|intcomma }} บาท</p>
+        <div class="relative w-32 h-32 mx-auto mt-3 mb-3">
+            <svg class="w-full h-full" viewBox="0 0 36 36">
+              <circle
+                class="text-gray-200"
+                stroke-width="4"
+                fill="none"
+                stroke="currentColor"
+                cx="18"
+                cy="18"
+                r="16"
+              ></circle>
+              <circle
+                class="{% if percentage_paid >= 75 %}text-green-500{% elif percentage_paid >= 50 %}text-yellow-500{% else %}text-red-500{% endif %}"
+                stroke-width="4"
+                stroke-dasharray="100, 100"
+                stroke-dashoffset="28"
+                stroke-linecap="round"
+                fill="none"
+                stroke="currentColor"
+                cx="18"
+                cy="18"
+                r="16"
+                style="stroke-dashoffset: calc(100 - {{ percentage_paid }});"
+              ></circle>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-xl font-bold text-gray-800">{{ percentage_paid|floatformat:0 }}%</span>
+            </div>
+          </div>
+        <h1 class="text-black text-center text-base mt-3">ชำระไปแล้ว</h1>
+        <p class="text-center text-base mb-3">จำนวนเงิน <a class="text-green-500">{{total_cost|floatformat:0|intcomma}}</a> บาท</p>
+        
+      
+
+    </div>
+</div>
+<div class="mr-3">
+    <div class="bg-white shadow-lg p-4 rounded-2xl w-full ">
+        <div class="ml-3 mt-1 mb-2">
+            <span class="text-blue-800 text-lg">ประวัติการชำระ</span>
+        </div>
+        <div class=" container mx-auto p-4">
+                <div class="flex flex-col gap-4">
+                    {% for history in page_obj %}
+                    <div class="bg-white shadow-base rounded-lg p-5 border-2  ">
+                        <div class="flex justify-between items-center">
+                            {% if history.appointment.detail%}
+                            <h3 class="text-sm  text-blue-800">
+                                {{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }}
+                            </h3>
+                            {% else %}
+                            <h3 class="text-sm  text-blue-800">
+                                {{ history.appointment.treatment.treatmentName }}
+                            </h3>
+                            {% endif %}
+                            
+                            <div class="ml-4 text-right">
+                                <p class="text-xs text-gray-700">
+                                    วันที่ทำการรักษา {{ history.appointment.date }}
+                                    <a class="ml-2 "  href="javascript:void(0);" 
+                                    onclick="openHistoryModal(
+                                        '{{ history.appointment.user.title }}{{ history.appointment.user.first_name }} {{ history.appointment.user.last_name }}',
+                                        '{{ history.appointment.dentist.user.title }}{{ history.appointment.dentist.user.first_name }} {{ history.appointment.dentist.user.last_name }}',
+                                        '{% if history.appointment.detail %}{{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }} {% else %}{{ history.appointment.treatment.treatmentName }} {% endif %}',
+                                        '{{ history.appointment.date }}',
+                                        '{{ history.cost|floatformat:0|intcomma }}',
+                                        '{{ history.description }}')">
+                                        <i class="fa-solid fa-circle-chevron-right text-xl text-blue-800"></i>
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-gray-500">ไม่มีข้อมูลการรักษา</p>
+                    {% endfor %}
+                </div>
+            
                     <!-- Pagination -->
                     <div class="mt-4 flex justify-center">
                         <nav class="btn-group">
@@ -146,13 +187,8 @@
                             {% endif %}
                         </nav>
                     </div>
-              </div>
-              
-          </div>
-        
-
+        </div>
     </div>
-
 </div>
 <!-- Modal -->
 <div id="historyModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">

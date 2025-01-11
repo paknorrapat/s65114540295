@@ -1,90 +1,92 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block main %}
 <div class="mr-3">
-<div class="  bg-white p-4  rounded-2xl w-full mb-4">
-    <div class="ml-3 mt-1 mb-1">
-      <span class="text-blue-800">การรักษาทั้งหมด</span>
-    </div>
-    <table class="table ">
-      <!-- head -->
-      <thead>
-        <tr>
-          <th class="text-center">ชื่อ</th>
-          <th class="text-center">รายการ</th>
-          <th class="text-center">วัน</th>
-          <th class="text-center">เวลา</th>
-          <th class="text-center">ตัวเลือก</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for th in page_obj %}
-        <!-- row 1 -->
-        <tr>
-          <td>
-            <div class="flex items-center gap-3">
-              <div class="avatar">
-                <div class="mask mask-squircle h-12 w-12">
-                  <img
-                    src="{{th.appointment.user.profile.image.url}}"
-                    alt="รูปโปรไฟล์ของผู้ใช้" />
+  <div class="  bg-white p-4  rounded-2xl w-full mb-4">
+      <div class="ml-3 mt-1 mb-1">
+        <span class="text-blue-800">การรักษาทั้งหมด</span>
+      </div>
+      <table class="table ">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th class="text-center">ชื่อ-นามสกุล</th>
+            <th class="text-center">รายการ</th>
+            <th class="text-center">วัน</th>
+            <th class="text-center">เวลา</th>
+            <th class="text-center">ตัวเลือก</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for th in page_obj %}
+          <!-- row 1 -->
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar">
+                  <div class="mask mask-squircle h-12 w-12">
+                    <img
+                      src="{{th.appointment.user.profile.image.url}}"
+                      alt="รูปโปรไฟล์ของผู้ใช้" />
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm">{{th.appointment.user.title}}{{th.appointment.user.first_name}} {{th.appointment.user.last_name}}</div>
                 </div>
               </div>
-              <div>
-                <div class="text-sm">{{th.appointment.user.title}}{{th.appointment.user.first_name}} {{th.appointment.user.last_name}}</div>
-              </div>
-            </div>
-          </td>
-          <td class="text-center">
-            {% if th.appointment.detail %}
-            <div class="text-xs">{{th.appointment.detail}} {{th.appointment.treatment}}</div>
-            {% else %}
-            <div class="text-xs">{{th.appointment.treatment}}</div>
+            </td>
+            <td class="text-center">
+              {% if th.appointment.detail %}
+              <div class="text-xs">{{th.appointment.detail}} {{th.appointment.treatment}}</div>
+              {% else %}
+              <div class="text-xs">{{th.appointment.treatment}}</div>
+              {% endif %}
+              <div class="badge badge-ghost badge-sm">{{th.appointment.dentist.user.title}}{{th.appointment.dentist.user.first_name}} {{th.appointment.dentist.user.last_name}}</div>
+            </td>
+            <td>
+              <div class="text-xs text-center">{{th.appointment.date}}</div>
+            </td>
+            <td>
+              <div class="text-xs text-center">{{th.appointment.time_slot}}</div>
+            </td>
+            <th class="flex justify-center items-center mt-3.5">
+                <a href="javascript:void(0);"   onclick="openHistoryModal(
+                  '{{ th.appointment.user.title }}{{ th.appointment.user.first_name }} {{ th.appointment.user.last_name }}',
+                  '{{ th.appointment.dentist.user.title }}{{ th.appointment.dentist.user.first_name }} {{ th.appointment.dentist.user.last_name }}',
+                  '{% if th.appointment.detail %}{{ th.appointment.detail }} {{ th.appointment.treatment.treatmentName }}{% else %}{{ th.appointment.treatment.treatmentName }}{% endif %}',
+                  '{{ th.appointment.date }}',
+                  '{{ th.cost|floatformat:0|intcomma }}',
+                  '{{ th.description }}')">
+                    <i class="fa-solid fa-circle-info text-xl mr-2"></i>
+                </a>
+                <a href="{% url 'update-t-history' th.id %}">
+                  <i class="fa-solid fa-pen-to-square text-xl mr-2 mb-1"></i>
+                </a>
+                
+            </th>
+
+            
+          </tr>      
+        {% endfor %}
+        </tbody>
+        
+        
+      </table>
+      <div class="flex justify-center mt-4">
+        <nav class="btn-group">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
             {% endif %}
-            <div class="badge badge-ghost badge-sm">{{th.appointment.dentist.user.title}}{{th.appointment.dentist.user.first_name}} {{th.appointment.dentist.user.last_name}}</div>
-          </td>
-          <td>
-            <div class="text-xs text-center">{{th.appointment.date}}</div>
-          </td>
-          <td>
-            <div class="text-xs text-center">{{th.appointment.time_slot}}</div>
-          </td>
-          <th class="flex justify-center items-center mt-3.5">
-              <a href="javascript:void(0);"   onclick="openHistoryModal(
-                '{{ th.appointment.user.title }}{{ th.appointment.user.first_name }} {{ th.appointment.user.last_name }}',
-                '{{ th.appointment.dentist.user.title }}{{ th.appointment.dentist.user.first_name }} {{ th.appointment.dentist.user.last_name }}',
-                '{% if th.appointment.detail %}{{ th.appointment.detail }} {{ th.appointment.treatment.treatmentName }}{% else %}{{ th.appointment.treatment.treatmentName }}{% endif %}',
-                '{{ th.appointment.date }}',
-                '{{ th.cost }}',
-                '{{ th.description }}')">
-                  <i class="fa-solid fa-circle-info text-xl mr-2"></i>
-              </a>
-              <a href="{% url 'update-t-history' th.id %}">
-                <i class="fa-solid fa-pen-to-square text-xl mr-2 mb-1"></i>
-              </a>
-              
-          </th>
 
-          
-        </tr>      
-      {% endfor %}
-      </tbody>
-      
-      
-    </table>
-    <div class="flex justify-center mt-4">
-      <nav class="btn-group">
-          {% if page_obj.has_previous %}
-          <a href="?page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-          <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-          {% endif %}
+            <span class="btn btn-disabled btn-sm">หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}</span>
 
-          <span class="btn btn-disabled btn-sm">หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}</span>
-
-          {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-          <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-          {% endif %}
-      </nav>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+            {% endif %}
+        </nav>
+      </div>
   </div>
 </div>
  <!-- Modal -->

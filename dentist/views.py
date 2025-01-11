@@ -14,12 +14,12 @@ def dentist_home(request):
     count_appointment_all =appointments.count()
     count_appointment_today =appointment_today.count()
     success_or_fail_today =appointment_today.filter(Q(status="สำเร็จ") | Q(status="ไม่สำเร็จ")).count()
-    # pagination
+    # pagination วันนี้
     paginator = Paginator(appointment_today,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
     appointment_page_number = request.GET.get('appointment_page')
     appointment_page_obj = paginator.get_page(appointment_page_number)
 
-    # pagination
+    # pagination ทั้งหมด
     paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -31,6 +31,8 @@ def treatment_history(request):
     appointment_today = Appointment.objects.filter(date=today,dentist=request.user.dentist,status='สำเร็จ').order_by('time_slot')
     appointments = Appointment.objects.filter(dentist=request.user.dentist,status='สำเร็จ',treatmenthistory__status=True)
 
+    t_history = Appointment.objects.filter(dentist=request.user.dentist,status='สำเร็จ')
+
     count_th_all =appointments.count()
     count_th_today =appointment_today.count()
     success_today =appointment_today.filter(treatmenthistory__status=True).count()
@@ -41,7 +43,7 @@ def treatment_history(request):
     appointment_page_obj = paginator.get_page(appointment_page_number)
 
     # pagination
-    paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
+    paginator = Paginator(t_history,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request,"dentist/treatment_history.html",{'appointment_page_obj': appointment_page_obj,
@@ -52,7 +54,7 @@ def treatment_history(request):
                                                             })
 
 def t_history_all(request):
-    treatment_history = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,appointment__status='สำเร็จ', status=True)
+    treatment_history = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,status=True)
     # pagination
     paginator = Paginator(treatment_history,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')

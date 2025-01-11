@@ -84,25 +84,25 @@
   <nav class="mt-4">
     <ul>
       <li class="px-4 py-2">
-        <a href="#" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
+        <a href="{% url 'dashboard' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
           <i class="fa-solid fa-chart-column text-lg mb-1"></i>
           <span class="text-sm">แดชบอร์ด</span>
         </a>
       </li>
       <li class="px-4 py-2">
-        <a href="#" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
+        <a href="{% url 'user-list' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
           <i class="fa-solid fa-user text-lg mb-1"></i>
-          <span class="text-sm">ผู้ใช้งาน</span>
+          <span class="text-sm">สมาชิก</span>
         </a>
       </li>
       <li class="px-4 py-2">
-        <a href="#" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
+        <a href="{% url 'dentist-list' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
           <i class="fa-solid fa-user-doctor text-lg mb-1"></i>
           <span class="text-sm">ทันตแพทย์</span>
         </a>
       </li>
       <li class="px-4 py-2">
-        <a href="#" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
+        <a href="{% url 'staff-list' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
           <i class="fa-solid fa-user-nurse text-lg mb-1"></i>
           <span class="text-sm">ผนักงาน</span>
         </a>
