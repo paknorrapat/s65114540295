@@ -194,8 +194,11 @@
 <!-- นัดหมายทั้งหมด-->
 <div class="mr-3">
   <div class=" text-lg bg-white p-3 rounded-2xl w-full">
-    <div class="ml-3 mt-1 mb-1">
+    <div class="flex ml-3 mt-1 mb-1">   
       <a href="{% url 'appointment-all' %}" class="text-lg text-blue-800">นัดหมายทั้งหมด</a>
+      <a href="{% url 'appointment-all' %}">
+        <i class="fa-solid fa-right-long w-full text-lg ml-3"></i>
+    </a> 
     </div>
     <table class="table ">
       <!-- head -->
