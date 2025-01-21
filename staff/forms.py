@@ -33,3 +33,8 @@ class TreatmentForm(forms.ModelForm):
     class Meta:
         model = Treatment
         fields = ["treatmentName","price"]
+
+class ExtraForm(forms.ModelForm):
+    class Meta:
+        model = Extra
+        fields = ["extraName","price"]

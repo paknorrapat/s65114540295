@@ -88,9 +88,18 @@ class Appointment(models.Model):
         treatment_name = self.treatment.treatmentName if self.treatment else 'No Treatment'
         return f'{self.user.first_name if self.user else "Unknown"} {self.user.last_name if self.user else ""} : {treatment_name} on {self.date} at {self.time_slot}'
 
+class Extra(models.Model):
+    extraName = models.CharField(max_length=100, unique=True,verbose_name="ค่าใช้จ่ายเพิ่มเติม")
+    price = models.FloatField(null=True, blank=True)
+    createdAt = models.DateTimeField(auto_now_add=True, blank=False)
+    updatedAt = models.DateTimeField(auto_now=True, blank=False)
+    
+    def __str__(self):
+        return self.extraName
 
 class TreatmentHistory(models.Model):
     appointment = models.OneToOneField(Appointment,on_delete=models.CASCADE,null=True,blank=True)
+    extra = models.ManyToManyField(Extra,blank=True,verbose_name="ค่าใช้จ่ายเพิ่มเติม")
     description = models.TextField(verbose_name='รายละเอียดการรักษา')
     cost = models.FloatField(null=True, blank=True,verbose_name='ค่าใช้จ่าย')
     status = models.BooleanField(default=True,null=True, blank=False)
@@ -106,3 +115,5 @@ class TreatmentHistory(models.Model):
         treatment_name = self.appointment.treatment.treatmentName if self.appointment and self.appointment.treatment else 'No Treatment'
 
         return f'{user_name} : {treatment_name}'
+
+

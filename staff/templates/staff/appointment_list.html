@@ -58,12 +58,23 @@
             <div class="text-center text-xs">{{apt.status}}</div>
           </td>
           <td>
-            <a href="{% url 'appointment-update' apt.id%}">
-              <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500"></i>
-            </a>
-            <a href="#" onclick="openDeleteModal('{{ apt.id }}')">
-              <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
-            </a>
+            {% if apt.status == 'สำเร็จ' or apt.status == 'ไม่สำเร็จ' %}
+            {% elif apt.status == "รอการนัดหมาย" %}
+              <a href="{% url 'appointment-update' apt.id%}">
+                <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500"></i>
+              </a>
+              <a href="#" onclick="openDeleteModal('{{ apt.id }}')">
+                <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
+              </a>
+            {% elif apt.date < today or  apt.date > today%}
+              <a href="{% url 'appointment-update' apt.id%}">
+                <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500"></i>
+              </a>
+              <a href="#" onclick="openDeleteModal('{{ apt.id }}')">
+                <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
+              </a>
+            {% endif %}
+        
           </td>
       
 

@@ -18,6 +18,10 @@ urlpatterns = [
     path("delete_treatment/<int:treatment_id>/",delete_treatment,name="delete-treatment"),
     path("edit_treatment/<int:treatment_id>/",edit_treatment,name="edit-treatment"),
 
+    path("add_extra/",add_extra,name="add-extra"),
+    path("delete_extra/<int:extra_id>/",delete_extra,name="delete-extra"),
+    path("edit_extra/<int:extra_id>/",edit_extra,name="edit-extra"),
+
     path("appointment_list/",appointment_list,name="appointment-list"),
     path("member_info/",member_info,name="member-info"),
 

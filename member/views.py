@@ -8,7 +8,13 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.db.models import Q,Sum
 from django.utils.timezone import now
+from django.contrib.auth.decorators import user_passes_test,login_required
+from django.http import HttpResponseForbidden
+
+def is_member(user):
+    return user.is_authenticated 
 # Create your views here.
+@user_passes_test(is_member, login_url='login')
 def member_home(request):
     search = request.GET.get("search","")
     if search:
@@ -75,19 +81,29 @@ def get_day_name(day_numbers):
         "7": "อาทิตย์"
     }
     return ", ".join([days_map.get(day, "") for day in day_numbers.split(",")]) 
+
+@login_required(login_url='login')
 def t_history(request,user_id):
     t_history = TreatmentHistory.objects.filter(appointment__user = user_id)
-
+    # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
+    if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
+        return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงประวัติการรักษานี้")
+    
      # pagination
     paginator = Paginator(t_history,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request,"member/t_history.html",{'page_obj':page_obj})
 
+@login_required(login_url='login')
 def braces_progress(request,user_id):
     treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id)
     braces = treatment_history.filter(appointment__treatment__is_braces=True)
 
+     # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
+    if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
+        return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงสถานะการจัดฟันนี้")
+    
      # pagination
     paginator = Paginator(braces,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
@@ -146,7 +162,7 @@ def braces_progress(request,user_id):
                                                          "max_cost": max_cost,
                                                          })
 
-
+@user_passes_test(is_member, login_url='login')
 def delete_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id=id)
     if request.method == 'POST':
@@ -154,7 +170,7 @@ def delete_appointment_member(request,id):
         return redirect('member-home')
     return redirect('member-home')
 
-
+@user_passes_test(is_member, login_url='login')
 def appointment_view(request,dentist_id):
     dentist = get_object_or_404(Dentist, id=dentist_id) 
     treatments = Treatment.objects.all()
@@ -171,7 +187,7 @@ def appointment_view(request,dentist_id):
     
     return render(request,'appointment/appointment_form.html',{'form':form,'dentist':dentist,'treatments':treatments})
 
-
+@login_required(login_url='login')
 def get_time_slots(request):
     date_str = request.GET.get('date')
     dentist_id = request.GET.get('dentist_id')  # รับ dentist_id เพื่อกรองเวลาสำหรับทันตแพทย์เฉพาะ
@@ -206,6 +222,7 @@ def get_time_slots(request):
 
     return JsonResponse({'slots': available_slots})
 
+@login_required(login_url='login')
 def calendar_view(request):
     appointments = Appointment.objects.all().values('date', 'time_slot', 'treatment__treatmentName','dentist__user__title','dentist__user__first_name', 
         'dentist__user__last_name')
@@ -224,6 +241,7 @@ def calendar_view(request):
     events_json = json.dumps(events)  # แปลง events เป็น JSON string
     return render(request, 'appointment/calendar.html', {'events': events_json})
 
+@user_passes_test(is_member, login_url='login')
 def select_appointment_date(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
 
@@ -243,6 +261,7 @@ def select_appointment_date(request, appointment_id):
         'appointment': appointment
     })
 
+@user_passes_test(is_member, login_url='login')
 def delete_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id=id)
     if request.method == 'POST':
@@ -250,6 +269,7 @@ def delete_appointment_member(request,id):
         return redirect('appointment-all')
     return redirect('appointment-all')
 
+@user_passes_test(is_member, login_url='login')
 def edit_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id = id)
     dentists = Dentist.objects.all() 
@@ -264,6 +284,7 @@ def edit_appointment_member(request,id):
     return render(request,'member/edit_appointment_member.html',{'appointment':appointment,'dentists':dentists,
         'treatments':treatments,})
 
+@user_passes_test(is_member, login_url='login')
 def appointment_all(request):
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()

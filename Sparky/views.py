@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate,login as auth_login,logout as auth_
 from django.contrib import messages
 from datetime import datetime
 from .models import User,Profile
+from django.http import HttpResponseForbidden
 
 # Create your views here.
 def firstpage(request):
@@ -15,9 +16,17 @@ def calculate_age(birth_date):
     age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
     return age
 
+@login_required(login_url='login')
 def showprofile(request, user_id):
     user = get_object_or_404(User, id=user_id)
+
+    # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
+    if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
+        return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")
+    
     age = calculate_age(user.profile.birthDate)  # คำนวณอายุ
+    
+    
     return render(request, "sparky/profile.html", {'user': user, 'age': age})  # ส่งค่าอายุไปยังเทมเพลต
 
 
@@ -81,9 +90,12 @@ def profile(request,user_id):
     
     return render(request,'registration/profile_form.html',{'profile_form':profile_form})
 
-
+@login_required(login_url='login')
 def updateprofile(request, user_id):
     user = get_object_or_404(User, id=user_id)
+    # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
+    if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
+        return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")
     profile = get_object_or_404(Profile, user=user)
     
     if request.method == 'POST':

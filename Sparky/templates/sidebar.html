@@ -15,6 +15,12 @@
           </a>
         </li>
         <li class="px-4 py-2">
+          <a href="{% url 'calendar' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
+            <i class="fa-regular fa-calendar text-lg mb-1"></i>
+            <span class="text-sm">ปฏิทิน</span>
+          </a>
+        </li>
+        <li class="px-4 py-2">
           <a href="{% url 'member-info' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
             <i class="fa-solid fa-bed text-lg mb-1"></i>
             <span class="text-sm">คนไข้</span>
@@ -57,10 +63,17 @@
           <span class="text-sm">โปรไฟล์</span>
         </a>
       </li>
+      
       <li class="px-4 py-2">
         <a href="{% url 'treatment-history' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
           <i class="fa-solid fa-folder-plus text-lg mb-1"></i>
           <span class="text-sm">การรักษา</span>
+        </a>
+      </li>
+      <li class="px-4 py-2">
+        <a href="{% url 'calendar' %}" class="flex flex-col items-center px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg nav-item" >
+          <i class="fa-regular fa-calendar text-lg mb-1"></i>
+          <span class="text-sm">ปฏิทิน</span>
         </a>
       </li>
       <li class="px-4 py-2">

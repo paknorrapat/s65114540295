@@ -32,7 +32,7 @@
                                     '{% if history.appointment.detail %}{{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }} {% else %}{{ history.appointment.treatment.treatmentName }}{% endif %}',
                                     '{{ history.appointment.date }}',
                                     '{{ history.cost|floatformat:0|intcomma  }}',
-                                    '{{ history.description }}')">
+                                    '{{ history.description|escapejs }}')">
                                     <i class="fa-solid fa-circle-chevron-right text-xl text-blue-800"></i>
                                 </a>
                             </p>
@@ -74,7 +74,7 @@
             <p><strong>ชื่อทันตแพทย์:</strong> <span id="modalDentistName"></span></p>
             <p><strong>ประเภทการรักษา:</strong> <span id="modalTreatmentName"></span></p>
             <p><strong>รายละเอียด:</strong> <span id="modalDescription"></span></p>
-            <p><strong>ค่าใช้จ่าย:</strong> <span id="modalCost"></span> บาท</p>
+            <p><strong>ค่าใช้จ่ายทั้งหมด:</strong> <span id="modalCost"></span> บาท</p>
             <div class="mt-4 flex justify-end">
                 <button class="btn bg-blue-500 text-white hover:bg-blue-400" onclick="closeHistoryModal()">ปิด</button>
             </div>

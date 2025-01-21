@@ -56,7 +56,8 @@
                   '{% if th.appointment.detail %}{{ th.appointment.detail }} {{ th.appointment.treatment.treatmentName }}{% else %}{{ th.appointment.treatment.treatmentName }}{% endif %}',
                   '{{ th.appointment.date }}',
                   '{{ th.cost|floatformat:0|intcomma }}',
-                  '{{ th.description }}')">
+                  '{{ th.description|escapejs }}',
+                  )">
                     <i class="fa-solid fa-circle-info text-xl mr-2"></i>
                 </a>
                 <a href="{% url 'update-t-history' th.id %}">
@@ -98,7 +99,7 @@
         <p><strong>ชื่อทันตแพทย์:</strong> <span id="modalDentistName"></span></p>
         <p><strong>ประเภทการรักษา:</strong> <span id="modalTreatmentName"></span></p>
         <p><strong>รายละเอียด:</strong> <span id="modalDescription"></span></p>
-        <p><strong>ค่าใช้จ่าย:</strong> <span id="modalCost"></span> บาท</p>
+        <p><strong>ค่าใช้จ่ายทั้งหมด:</strong> <span id="modalCost"></span> บาท</p>
         <div class="mt-4 flex justify-end">
             <button class="btn bg-blue-500 text-white hover:bg-blue-400" onclick="closeHistoryModal()">ปิด</button>
         </div>
@@ -116,6 +117,7 @@
         document.getElementById('modalDate').textContent = date;
         document.getElementById('modalCost').textContent = cost;
         document.getElementById('modalDescription').textContent = description;
+  
 
         // แสดง Modal
         document.getElementById('historyModal').classList.remove('hidden');

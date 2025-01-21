@@ -5,10 +5,13 @@ from .forms import *
 from .models import *
 from django.http import JsonResponse
 from django.db.models import Q
+from django.utils.timezone import now
+from django.contrib.auth.decorators import user_passes_test,login_required
 
+def is_staff(user):
+    return user.is_authenticated and user.is_staff
 
-
-# Create your views here.
+@user_passes_test(is_staff, login_url='login')
 def staff_home(request):
     search = request.GET.get("search","")
     if search:
@@ -61,8 +64,9 @@ def staff_home(request):
         "count_appointment_all":count_appointment_all
         })
 
-
+@user_passes_test(is_staff, login_url='login')
 def appointment_list(request):
+    today = now().date()
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
     appointments = Appointment.objects.all()
@@ -76,8 +80,9 @@ def appointment_list(request):
                                                          "appointments":appointments,
                                                          "page_obj":page_obj,                                       
                                                          'dentists':dentists,
-                                                         'treatments':treatments})
-
+                                                         'treatments':treatments,
+                                                         'today': today,})
+@user_passes_test(is_staff, login_url='login')
 def delete_appointment(request,id):
     appointment = get_object_or_404(Appointment,id=id)
     if request.method == 'POST':
@@ -85,6 +90,7 @@ def delete_appointment(request,id):
         return redirect('appointment-list')
     return redirect('appointment-list')
 
+@user_passes_test(is_staff, login_url='login')
 def add_appointment(request,user_id):
      # ตรวจสอบว่า user_id ถูกต้องหรือไม่
     user = get_object_or_404(User, id=user_id)
@@ -163,7 +169,7 @@ def add_appointment(request,user_id):
                                                          "step5_completed": step5_completed,
                                                         })
 
-
+@user_passes_test(is_staff, login_url='login')
 def update_appointment(request,appointment_id):
     appointment = get_object_or_404(Appointment,id = appointment_id)
     dentists = Dentist.objects.all() 
@@ -177,7 +183,7 @@ def update_appointment(request,appointment_id):
         'treatments':treatments,})
 
 
-
+@user_passes_test(is_staff, login_url='login')
 def dentist_manage(request): 
     users = User.objects.filter(is_dentist=True, dentist__workDays__isnull=False).exclude(dentist__workDays='')
     dentists = User.objects.filter(is_dentist=True)
@@ -202,8 +208,9 @@ def get_day_name(day_numbers):
         "6": "เสาร์",
         "7": "อาทิตย์"
     }
-    return ", ".join([days_map.get(day, "") for day in day_numbers.split(",")])    
-
+    return ", ".join([days_map.get(day, "") for day in day_numbers.split(",")]) 
+   
+@user_passes_test(is_staff, login_url='login')
 def add_dentist(request):
     if request.method == 'POST':
         form = DentistForm(request.POST)
@@ -216,6 +223,7 @@ def add_dentist(request):
         
     return redirect('dentist-manage')
 
+@user_passes_test(is_staff, login_url='login')
 def delete_dentist(request,dentist_id):
     dentist = get_object_or_404(Dentist,id=dentist_id)
     if request.method == 'POST':
@@ -223,6 +231,7 @@ def delete_dentist(request,dentist_id):
         return redirect('dentist-manage')
     return redirect('dentist-manage')
 
+@user_passes_test(is_staff, login_url='login')
 def edit_dentist(request,dentist_id):
     dentist = get_object_or_404(Dentist,id = dentist_id)
     dentist.startTime = dentist.startTime.strftime('%H:%M') if dentist.startTime else ""
@@ -239,16 +248,24 @@ def edit_dentist(request,dentist_id):
         form = DentistForm(instance=dentist)
     return render(request,'staff/edit_dentist.html',{'dentist':dentist})
 
+@user_passes_test(is_staff, login_url='login')
 def treatment_manage(request): 
     treatments = Treatment.objects.all()
+    extras = Extra.objects.all()
     
     # pagination
-    paginator = Paginator(treatments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
+    paginator = Paginator(treatments,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request,'staff/treatment_manage.html',{'treatments':treatments,'page_obj':page_obj})
+    # pagination
+    paginator2 = Paginator(extras,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
+    page_number_extra = request.GET.get('page_extra')
+    page_obj_extra = paginator2.get_page(page_number_extra)
 
+    return render(request,'staff/treatment_manage.html',{'treatments':treatments,'page_obj':page_obj,'extras':extras,'page_obj_extra':page_obj_extra})
+
+@user_passes_test(is_staff, login_url='login')
 def add_treatment(request):
     if request.method =="POST" :
         form = TreatmentForm(request.POST)
@@ -257,6 +274,7 @@ def add_treatment(request):
             return redirect("treatment-manage")
     return redirect("treatment-manage")
 
+@user_passes_test(is_staff, login_url='login')
 def delete_treatment(request,treatment_id):
     treatment = get_object_or_404(Treatment,id=treatment_id)
     if request.method == 'POST':
@@ -264,16 +282,44 @@ def delete_treatment(request,treatment_id):
         return redirect('treatment-manage')
     return redirect('treatment-manage')
 
+@user_passes_test(is_staff, login_url='login')
 def edit_treatment(request,treatment_id):
     treatment = get_object_or_404(Treatment,id=treatment_id)
     if request.method == "POST" :
-        print(request.POST)
         form = TreatmentForm(request.POST,instance = treatment)
         if form.is_valid():
             form.save()
             return redirect("treatment-manage")
     return render(request,"staff/edit_treatment.html",{"treatment":treatment})
 
+@user_passes_test(is_staff, login_url='login')
+def add_extra(request):
+    if request.method =="POST" :
+        form = ExtraForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("treatment-manage")
+    return redirect("treatment-manage")
+
+@user_passes_test(is_staff, login_url='login')
+def delete_extra(request,extra_id):
+    extra = get_object_or_404(Extra,id=extra_id)
+    if request.method == 'POST':
+        extra.delete()
+        return redirect('treatment-manage')
+    return redirect('treatment-manage')
+
+@user_passes_test(is_staff, login_url='login')
+def edit_extra(request,extra_id):
+    extra = get_object_or_404(Extra,id=extra_id)
+    if request.method == "POST" :
+        form = ExtraForm(request.POST,instance = extra)
+        if form.is_valid():
+            form.save()
+            return redirect("treatment-manage")
+    return render(request,"staff/edit_extra.html",{"extra":extra})
+
+@login_required
 def member_info(request):
     search = request.GET.get("search","")
     if search:
@@ -287,3 +333,5 @@ def member_info(request):
     user_page_obj = paginator2.get_page(user_page_number)
 
     return render(request,"staff/member_info.html",{"users":users,"user_page_obj":user_page_obj})
+
+

@@ -19,10 +19,9 @@
           <h1 class="text-center text-3xl font-bold">{{count_th_all}}</h1>
         </div>
       </div>
-
 </div>
 <div class="mr-3">
-  <div class=" bg-white p-4  rounded-2xl w-full mb-4">
+  <div class=" bg-white p-4  rounded-2xl w-full mb-3">
     <div class="ml-3 mt-1 mb-1">
       <span class="text-blue-800">การรักษาวันนี้</span>
     </div>
@@ -69,11 +68,7 @@
               {% if apt.treatmenthistory.status %}
               <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
               {% elif apt.status == 'สำเร็จ' %}
-              <a href="#" onclick="openAddModal('{{ apt.user.id }}', '{{ apt.user.title }}{{ apt.user.first_name }} {{ apt.user.last_name }}',
-              '{{ apt.dentist.user.title }}{{ apt.dentist.user.first_name }} {{ apt.dentist.user.last_name }}',
-              '{% if apt.detail %}{{ apt.detail }} {{ apt.treatment.treatmentName }}{% else %}{{ apt.treatment.treatmentName }}{% endif %}',
-              '{{apt.treatment.price}}',
-              '{{apt.id}}')">
+              <a href="{% url 'add-treatmenthistory' apt.id %}" >
                   <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
               </a>
           
@@ -104,7 +99,8 @@
       </nav>
   </div>
 </div>
-<div class=" mr-3 bg-white p-4  rounded-2xl w-full mb-4">
+
+<div class=" mr-3 bg-white p-4  rounded-2xl w-full mb-3">
     <div class="ml-3 mt-1 mb-1">
       <a href="{% url 't-history-all' %}" class="text-blue-800">การรักษาทั้งหมด</a>
     </div>
@@ -155,11 +151,7 @@
               {% if apt.treatmenthistory.status %}
               <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
               {% elif apt.status == 'สำเร็จ' %}
-              <a href="#" onclick="openAddModal('{{ apt.user.id }}', '{{ apt.user.title }}{{ apt.user.first_name }} {{ apt.user.last_name }}',
-              '{{ apt.dentist.user.title }}{{ apt.dentist.user.first_name }} {{ apt.dentist.user.last_name }}',
-              '{% if apt.detail %}{{ apt.detail }} {{ apt.treatment.treatmentName }}{% else %}{{ apt.treatment.treatmentName }}{% endif %}',
-              '{{apt.treatment.price }}',
-              '{{apt.id}}')">
+              <a href="{% url 'add-treatmenthistory' apt.id %}">
                   <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
               </a>
           
@@ -188,75 +180,9 @@
           <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
           {% endif %}
       </nav>
-  </div>
-
-<!-- Modal เพิ่ม-->
-<div id="addTreatmentHistoryModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
-  <div class="w-1/3 max-w-md">
-      <div class="bg-white p-8 rounded-lg shadow-lg w-full">
-        <h3 class="text-xl  mb-4 text-blue-800">การรักษา</h3>
-        <form id="addForm" method="POST" >
-          {% csrf_token %}
-              <label for="user">ชื่อคนไข้</label><br>
-                  <input type="text" id="userName" name="user" readonly class="input input-bordered w-full my-2" >
-                  <input type="hidden" id="userId" name="user" readonly  >
-                  <input type="hidden" id="appointmentId" name="appointment" readonly  >
-
-                  <label for="dentist">ชื่อทันตแพทย์</label><br>
-                  <input type="text" id="dentist" name="dentist"   readonly class="input input-bordered w-full my-2" >
-                      
-                  <label for="treatment">ประเภทการรักษา</label><br>
-                  <input type="text" id="treatment" name="treatment" readonly class="input input-bordered w-full  my-2" >
-
-                  <label for="description">รายละเอียดการรักษา</label><br>
-                  <textarea id="description" name="description" required class="textarea textarea-bordered w-full my-2"></textarea>
-                  
-                  <label for="cost">ค่าใช้จ่าย</label><br>
-                  <input type="text" id="cost" name="cost" class="input input-bordered w-full  my-2" >
-
-                  <div class="mt-4 flex justify-end">
-                    <button type="submit" class="btn bg-blue-500 text-white hover:bg-blue-400 mr-2">+ เพิ่มการรักษา</button>
-                    <button type="button" class="btn text-red-500 bg-white border-2 border-red-500  hover:bg-red-500 hover:text-white hover:border-red-500 " onclick="closeAddModal()">ยกเลิก</button>
-                  </div>
-        </form>
-      </div>
-    </div>    
+    </div>
 </div>
+
 <script>
-    function openAddModal(userId,userName,dentistName,treatmentName,price,aptId) {
-        // เปิด Modal ที่จะเพิ่มนัดหมาย
-        const modal = document.getElementById('addTreatmentHistoryModal');
-        document.getElementById('addForm').action = `/dentist/add_treatmenthistory/`; 
-        modal.classList.remove('hidden');  // แสดง Modal โดยการลบคลาส hidden
-        
-
-        // ส่งค่า user_id ไปยังฟอร์ม
-        const userInput = document.getElementById('userId');
-        userInput.value = userId;
-
-         // แสดงชื่อผู้ใช้ในฟอร์ม
-         const userNameInput = document.getElementById('userName');
-        userNameInput.value = userName;  // แสดงชื่อผู้ใช้ในฟอร์ม
-
-         // ส่งชื่อทันตแพทย์ไปยังฟอร์ม
-        const dentistInput = document.getElementById('dentist');
-        dentistInput.value = dentistName;
-
-        const treatmentInput = document.getElementById('treatment');
-        treatmentInput.value = treatmentName;
-
-        const priceInput = document.getElementById('cost');
-        priceInput.value = price;
-
-        const aptInput = document.getElementById('appointmentId');
-        aptInput.value = aptId;
-    }
-
-    // ฟังก์ชันปิด Modal
-    function closeAddModal() {
-        const modal = document.getElementById('addTreatmentHistoryModal');
-        modal.classList.add('hidden');  // ซ่อน Modal โดยการเพิ่มคลาส hidden
-    }
-
 </script>
 {% endblock%}

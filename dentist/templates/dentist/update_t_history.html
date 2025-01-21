@@ -17,14 +17,14 @@
                 <input type="text" id="treatment" name="treatment" value="{{treatment_history.appointment.treatment.treatmentName}}"  class="input input-bordered w-full  my-2" >
 
                 <label for="description">รายละเอียดการรักษา</label><br>
-                <textarea id="description" name="description"  required class="textarea textarea-bordered w-full my-2">{{treatment_history.description}}</textarea>
+                <textarea id="description" name="description"  required class="textarea textarea-bordered w-full max-w-lg h-32 my-2">{{treatment_history.description}}</textarea>
                 
                 <label for="cost">ค่าใช้จ่าย</label><br>
                 <input type="text" id="cost" name="cost" value="{{treatment_history.cost}}" required class="input input-bordered w-full  my-2" >
 
                 <div class="mt-4 flex justify-end">
-                  <button type="submit" class="btn bg-blue-500 text-white hover:bg-blue-400 mr-2">+ เพิ่มการรักษา</button>
-                  <a href="{% url 't-history-all' %}" type="button" class="btn text-red-500 bg-white border-2 border-red-500  hover:bg-red-500 hover:text-white hover:border-red-500 " ">ยกเลิก</a>
+                  <button type="submit" class="btn bg-blue-500 text-white hover:bg-blue-400 mr-2">บันทึกข้อมูล</button>
+                  <a href="{% url 't-history-all' %}" type="button" class="btn btn-ghost " ">ยกเลิก</a>
                 </div>
       </form>
     </div>

@@ -4,16 +4,49 @@ from django.core.paginator import Paginator
 from .forms import *
 from django.db.models import Q,Count,Sum
 from datetime import datetime
-from django.db.models.functions import TruncMonth
-# Create your views here.
+from django.db.models.functions import TruncMonth,ExtractDay, ExtractHour, ExtractWeekDay
+from django.utils.timezone import now,localtime
+from django.contrib.auth.decorators import user_passes_test,login_required
+
+def is_manager(user):
+    return user.is_authenticated and user.is_manager
+
 def calculate_age(birth_date):
     today = datetime.now()
     return today.year - birth_date.year - ((today.month,today.day)<(birth_date.month, birth_date.day))
 
+@user_passes_test(is_manager, login_url='login')
 def dashboard(request):
     # ปีปัจจุบัน
     current_year = datetime.now().year
-    appointments = Appointment.objects.filter(date__year=current_year,date__isnull=False)
+    current_year_start = datetime(datetime.now().year, 1, 1)
+
+    patients_count = User.objects.filter(is_staff=False,is_dentist=False,is_manager=False,is_superuser=False).count()
+    dentists_count = User.objects.filter(is_dentist=True).count()
+    staffs_count = User.objects.filter(is_staff=True,is_superuser=False,).count()
+
+    new_patients = User.objects.filter(is_staff=False,is_dentist=False,is_manager=False,is_superuser=False,date_joined__gte=current_year_start).count
+    old_patients = User.objects.filter(is_staff=False,is_dentist=False,is_manager=False,is_superuser=False,date_joined__lt=current_year_start).count
+
+    # นับจำนวนการนัดหมายตามวันในสัปดาห์
+    appointments_by_day = (
+        Appointment.objects
+        .filter(date__isnull=False,date__year=current_year)
+        .annotate(day_of_week=ExtractWeekDay('date'))  # ดึงวันในสัปดาห์ (1=อาทิตย์, 7=เสาร์)
+        .values('day_of_week')
+        .annotate(total=Count('id')) #นับจำนวนการนัดหมาย
+        .order_by('day_of_week')
+    )
+
+    # นับจำนวนการนัดหมายตามชั่วโมง
+    appointments_by_hour = (
+        Appointment.objects
+        .filter(date__isnull=False,date__year=current_year)
+        .annotate(hour=ExtractHour('time_slot'))  # ดึงชั่วโมงจาก time_slot
+        .values('hour')
+        .annotate(total=Count('id'))  # นับจำนวนการนัดหมาย
+        .order_by('hour')
+    )
 
     # คำนวณช่วงอายุ
     age_ranges = [
@@ -49,12 +82,53 @@ def dashboard(request):
 
      # นับจำนวนการนัดหมายตามทันตแพทย์
     dentist_workload = (
-        Appointment.objects.filter(date__isnull=False)
+        Appointment.objects.filter(date__isnull=False,date__year=current_year)
         .values('dentist__user__title','dentist__user__first_name', 'dentist__user__last_name')
         .annotate(total_appointments=Count('id'))
         .order_by('-total_appointments')  # เรียงจากทันตแพทย์ที่มีงานมากไปน้อย
     )
 
+
+    return render(request,"manager/dashboard.html",{                                                                                                           
+                                                     'patients_by_gender': patients_by_gender,
+                                                     'patients_by_age': patients_by_age,
+                                                     'dentist_workload': dentist_workload,
+                                                     'patients_count':patients_count,
+                                                     'dentists_count':dentists_count,
+                                                     'staffs_count':staffs_count,
+                                                     'new_patients': new_patients,
+                                                     'old_patients': old_patients,
+                                                     'appointments_by_day': appointments_by_day,
+                                                     'appointments_by_hour': appointments_by_hour,
+                                                     
+                                                    })
+
+@user_passes_test(is_manager, login_url='login')
+def second_dashboard(request):
+    # กำหนดช่วงเวลา
+    today_date = localtime(now()).date()  # ดึงวันที่วันนี้
+
+    # คำนวณรายได้วันนี้
+    total_income_today = TreatmentHistory.objects.filter(
+        appointment__date=today_date  # ใช้ฟิลด์ date ในโมเดล Appointment
+    ).aggregate(Sum('cost'))['cost__sum'] or 0
+
+    # ดึงเดือนและปีปัจจุบัน
+    current_date = now()
+    current_month = current_date.month
+    current_year = current_date.year
+
+    # กรองรายได้เฉพาะเดือนและปีปัจจุบัน
+    total_income_month = TreatmentHistory.objects.filter(
+       appointment__date__year=current_year,
+       appointment__date__month=current_month,
+    ).aggregate(Sum('cost'))['cost__sum'] or 0
+
+    # คำนวณรายได้ทั้งหมด
+    total_income_all = TreatmentHistory.objects.aggregate(Sum('cost'))['cost__sum'] or 0
+
+
+    appointments = Appointment.objects.filter(date__year=current_year,date__isnull=False)
     # รายได้รวมตามเดือนในปีปัจจุบัน
     revenue_by_month = (
         TreatmentHistory.objects.filter(appointment__date__year=current_year)
@@ -63,8 +137,7 @@ def dashboard(request):
         .annotate(total_revenue=Sum('cost'))
         .order_by('month')
     )
-
-     # รายได้รวมแยกตามประเภทการรักษา
+    # รายได้รวมแยกตามประเภทการรักษา
     revenue_by_treatment = (
         TreatmentHistory.objects.values('appointment__treatment__treatmentName')
         .annotate(total_revenue=Sum('cost'))
@@ -82,26 +155,27 @@ def dashboard(request):
     appointments_by_status = appointments.values('status').annotate(total=Count('id'))
     appointments_by_month = appointments.annotate(month=TruncMonth('date')).values('month').annotate(total=Count('id')).order_by('month')
 
-     # แมปตัวเลขเดือนเป็นชื่อเดือนภาษาไทย
+    # แมปตัวเลขเดือนเป็นชื่อเดือนภาษาไทย
     month_names = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
                    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
-    for month in appointments_by_month:
-        month_number = month['month'].month
-        month['month_name'] = month_names[month_number - 1]
-
     for month in revenue_by_month:
         month_number = month['month'].month
         month['month_name'] = month_names[month_number - 1]
-    return render(request,"manager/dashboard.html",{ 'appointments_by_month': appointments_by_month,
-                                                     'appointments_by_status': appointments_by_status,
-                                                     'revenue_by_month': revenue_by_month,
-                                                     'revenue_by_treatment': revenue_by_treatment,
-                                                     'treatment_popularity': treatment_popularity,
-                                                     'patients_by_gender': patients_by_gender,
-                                                     'patients_by_age': patients_by_age,
-                                                     'dentist_workload': dentist_workload,
-                                                    })
 
+    for month in appointments_by_month:
+        month_number = month['month'].month
+        month['month_name'] = month_names[month_number - 1]
+    return render(request,'manager/second_dashboard.html',{'revenue_by_month': revenue_by_month,
+                                                           'revenue_by_treatment':revenue_by_treatment,
+                                                           'treatment_popularity': treatment_popularity,
+                                                           'appointments_by_month': appointments_by_month,
+                                                           'appointments_by_status': appointments_by_status,
+                                                           'total_income_today': total_income_today,
+                                                           'total_income_month': total_income_month,
+                                                           'total_income_all': total_income_all,                                                          
+                                                            })
+
+@user_passes_test(is_manager, login_url='login')
 def user_list(request):
     search = request.GET.get("search","")
     if search:
@@ -115,6 +189,7 @@ def user_list(request):
     page_obj = paginator.get_page(page_number)
     return render(request,"manager/user_list.html",{"page_obj":page_obj})
 
+@user_passes_test(is_manager, login_url='login')
 def update_role(request):
     if request.method == "POST":
         user_id = request.POST.get("user_id")
@@ -136,6 +211,7 @@ def update_role(request):
             user.save()
             return redirect('user-list')
 
+@user_passes_test(is_manager, login_url='login')
 def dentist_list(request):
     users = User.objects.filter(is_dentist=True)
 
@@ -145,6 +221,7 @@ def dentist_list(request):
     page_obj = paginator.get_page(page_number)
     return render(request,"manager/dentist_list.html",{"page_obj":page_obj})
 
+@user_passes_test(is_manager, login_url='login')
 def staff_list(request):
     users = User.objects.filter(is_staff=True,is_superuser=False)
 
@@ -154,6 +231,7 @@ def staff_list(request):
     page_obj = paginator.get_page(page_number)
     return render(request,"manager/staff_list.html",{"page_obj":page_obj})
 
+@user_passes_test(is_manager, login_url='login')
 def delete_user(request,user_id):
     user = get_object_or_404(User,id=user_id)
     if request.method == 'POST':

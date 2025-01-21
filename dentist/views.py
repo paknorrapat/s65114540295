@@ -4,7 +4,12 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from .forms import *
 from django.db.models import Q
-# Create your views here.
+from django.contrib.auth.decorators import user_passes_test,login_required
+
+def is_dentist(user):
+    return user.is_authenticated and user.is_dentist
+
+@user_passes_test(is_dentist, login_url='login')
 def dentist_home(request):
     # ฟิลเตอร์นัดหมายที่มีวันที่ตรงกับวันนี้ 
     today = timezone.now().date()
@@ -25,6 +30,7 @@ def dentist_home(request):
     page_obj = paginator.get_page(page_number)
     return render(request,"dentist/dentist_home.html",{'appointment_page_obj': appointment_page_obj,'page_obj':page_obj,'count_appointment_today': count_appointment_today,"success_or_fail_today":success_or_fail_today,"count_appointment_all":count_appointment_all})
 
+@user_passes_test(is_dentist, login_url='login')
 def treatment_history(request):
      # ฟิลเตอร์นัดหมายที่มีวันที่ตรงกับวันนี้ 
     today = timezone.now().date()
@@ -51,8 +57,9 @@ def treatment_history(request):
                                                             'count_th_all':count_th_all,
                                                             'count_th_today':count_th_today,
                                                             'success_today':success_today,
+                                                    
                                                             })
-
+@user_passes_test(is_dentist, login_url='login')
 def t_history_all(request):
     treatment_history = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,status=True)
     # pagination
@@ -61,18 +68,29 @@ def t_history_all(request):
     page_obj = paginator.get_page(page_number)
     return render(request,"dentist/t_history_all.html",{'page_obj':page_obj})
 
-def add_treatment_history(request):
+@user_passes_test(is_dentist, login_url='login')
+def add_treatment_history(request, apt_id):
+    appointment = get_object_or_404(Appointment, id=apt_id)
+    extras = Extra.objects.all()
+    treatments = Treatment.objects.all()
+
     if request.method == "POST":
-        user_id = request.POST.get('user')  # ดึงค่า user จากฟอร์ม
         form = TreatmentHistoryForm(request.POST)
         if form.is_valid():
             treatmenthistory = form.save(commit=False)
-            treatmenthistory.user_id = user_id
-            treatment_history.status = True  # ตั้งค่า status เป็น True
+            treatmenthistory.appointment = appointment
+            treatmenthistory.status = True
             treatmenthistory.save()
-            return redirect("treatment-history")
-    return redirect('treatment-history')
 
+            return redirect("treatment-history")
+        
+    return render(request, 'dentist/add_t_history.html', {
+        'extras': extras,
+        'appointment': appointment,
+        'treatments': treatments,
+    })
+
+@user_passes_test(is_dentist, login_url='login')
 def update_treatment_history(request,treatment_history_id):
     # ดึง TreatmentHistory ที่ต้องการอัปเดต
     treatment_history = get_object_or_404(TreatmentHistory, id=treatment_history_id)
