@@ -12,6 +12,7 @@
             <!-- ด้านซ้าย: สถานะการจัดฟัน -->
             <div class="mr-10 w-full bg-gray-100 p-6 rounded-l-lg">
                 <h3 class="text-base text-blue-800 mb-4">สถานะการจัดฟัน</h3>
+                {% if step1_completed %}
                     <div class="space-y-4">
                         <!-- ขั้นที่ 1: ปรึกษาวางแผน -->
                         <div class="flex items-center gap-4">
@@ -89,6 +90,9 @@
                             {% endif %}
                         </div>
                     </div>
+                {% else %}
+                 <span class="text-gray-500 ">ไม่มีข้อมูลการจัดฟัน</span>
+                {% endif%}
                    
             </div>
 

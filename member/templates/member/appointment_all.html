@@ -8,6 +8,72 @@
   <div class="ml-3 mt-1 mb-1">
     <span class="text-lg text-blue-800">นัดหมายทั้งหมด</span>
   </div>
+
+  <div class="flex flex-wrap justify-end items-center p-4 mt-2 mb-5 ">
+    <!-- Filter Form -->
+    <form method="GET" class="flex items-center space-x-4 w-full h-3 md:w-auto">
+      <!-- Day Filter -->
+      <div class="form-control">
+        <label for="day" class="label">
+          <span class="label-text">เลือกวัน:</span>
+        </label>
+        <select name="day" id="day" class="select select-bordered w-full md:w-28">
+          <option value="">ทั้งหมด</option>
+          {% for day in days %}
+            <option value="{{ day }}" {% if selected_day == day|stringformat:"d" %}selected{% endif %}>{{ day }}</option>
+          {% endfor %}
+        </select>
+      </div>
+  
+      <!-- Month Filter -->
+      <div class="form-control">
+        <label for="month" class="label">
+          <span class="label-text">เลือกเดือน:</span>
+        </label>
+        <select name="month" id="month" class="select select-bordered w-full md:w-36">
+          <option value="">ทั้งหมด</option>
+          {% for number, month in months %}
+            <option value="{{ number }}" {% if selected_month == number|stringformat:"d" %}selected{% endif %}>{{ month }}</option>
+          {% endfor %}
+        </select>
+      </div>
+  
+      <!-- Year Filter -->
+      <div class="form-control">
+        <label for="year" class="label">
+          <span class="label-text">เลือกปี:</span>
+        </label>
+        <select name="year" id="year" class="select select-bordered w-full md:w-28">
+          <option value="">ทั้งหมด</option>
+          {% for year in years %}
+            <option value="{{ year }}" {% if selected_year == year|stringformat:"d" %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-control">
+        <label for="status" class="label">
+          <span class="label-text">สถานะ:</span>
+        </label>
+        <select name="status" id="status" class="select select-bordered w-full md:w-36">
+            <option value="">ทั้งหมด</option>
+            {% for value, label in statuses %}
+            <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+      </div>
+  
+      <!-- Submit Button -->
+      <div class="form-control">
+        <button type="submit" class="btn btn-outline btn-sm w-full mt-6">
+          กรองข้อมูล
+        </button>
+      </div>
+    </form>
+  </div>
+
   <table class="table ">
     <!-- head -->
     <thead>
@@ -54,16 +120,32 @@
           <div class="text-xs text-center">{{apt.time_slot}}</div>
         </td>
         <td class="text-center">
-        {% if apt.status == "รอการนัดหมาย" %}
-        <a href="{% url 'select-appointment-date' apt.id%}" class="text-xs text-blue-500 ">เลือกวันเวลา</a>
-        {% else %}
-        <div class="text-center text-xs">{{apt.status}}</div>
-        {% endif %}
+          <div class="text-center text-xs">
+              {% if apt.status == 'สำเร็จ' %}
+                  <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
+              {% elif apt.status == 'ไม่สำเร็จ' %}
+                  <i class="fa-regular fa-rectangle-xmark text-xl mr-2 text-red-500"></i>
+              {% elif apt.status == 'รอดำเนินการ' %}
+                {% if apt.date and apt.time_slot %}
+                    {{ apt.status }}
+                {% else %}
+                  <a href="{% url 'select-appointment-date' apt.id %}" class="text-xs text-blue-500">เลือกวันเวลา</a>
+                {% endif %}
+              {% else %} 
+    
+              {% endif %} 
+          </div>
         </td>
         <td class="text-center">
           {% if apt.status == 'สำเร็จ' or apt.status == 'ไม่สำเร็จ' %}
-          
           {% elif apt.date < today or  apt.date > today%}
+            <a href="{% url 'member-appointment-edit' apt.id%}">
+              <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500 "></i>
+            </a>
+            <a href="#" onclick="openDeleteModal('{{ apt.id }}')">
+              <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
+            </a>
+          {% else %}
             <a href="{% url 'member-appointment-edit' apt.id%}">
               <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500 "></i>
             </a>

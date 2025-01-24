@@ -19,6 +19,11 @@
           <h1 class="text-center text-3xl font-bold">{{count_th_all}}</h1>
         </div>
       </div>
+      <div class=" ml-3 bg-white p-8  rounded-2xl h-8 flex items-center justify-center">
+        <a href="{% url 't-history-all' %}">
+            <i class="fa-solid fa-right-long w-full text-2xl"></i>
+        </a> 
+      </div>
 </div>
 <div class="mr-3">
   <div class=" bg-white p-4  rounded-2xl w-full mb-3">
@@ -103,9 +108,7 @@
 <div class=" mr-3 bg-white p-4  rounded-2xl w-full mb-3">
     <div class="flex ml-3 mt-1 mb-1">
       <a href="{% url 't-history-all' %}" class="text-blue-800">การรักษาทั้งหมด</a>
-      <a href="{% url 't-history-all' %}">
-        <i class="fa-solid fa-right-long w-full text-lg ml-3"></i>
-      </a> 
+    
     </div>
     <table class="table ">
       <!-- head -->

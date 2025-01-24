@@ -1,12 +1,14 @@
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect,get_object_or_404,reverse
 from django.utils import timezone
 from django.core.paginator import Paginator
 from .forms import *
 from .models import *
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponseRedirect
 from django.db.models import Q
 from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test,login_required
+from datetime import datetime
+
 
 def is_staff(user):
     return user.is_authenticated and user.is_staff
@@ -69,19 +71,67 @@ def appointment_list(request):
     today = now().date()
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
-    appointments = Appointment.objects.all()
-  
+    appointments = Appointment.objects.all().order_by('-date')
+    
+    #รับค่า filter จาก dropdown
+    selected_day = request.GET.get('day')
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+    selected_status = request.GET.get('status')  # รับค่าของ status
+
+    search = request.GET.get("search","")
+    # กรองข้อมูล
+    if search:
+        appointments = appointments.filter(Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search))
+    if selected_day:
+        appointments = appointments.filter(date__day=selected_day)
+    if selected_month:
+        appointments = appointments.filter(date__month=selected_month)
+    if selected_year:
+        appointments = appointments.filter(date__year=selected_year)
+    if selected_status:  # กรองตามสถานะ
+        appointments = appointments.filter(status=selected_status) 
+
+    # จัดการ Query Parameters (ลบ key 'page')
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        query_params.pop('page')
     # pagination
     paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    #ข้อมูล dropdown
+    days = list(range(1,32))
+    # ข้อมูลเดือน (mapping)
+    months = [
+    (1, "มกราคม"), (2, "กุมภาพันธ์"), (3, "มีนาคม"), (4, "เมษายน"),
+    (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
+    (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
+    ]
+    years =range(2021,datetime.now().year + 1)
+
+    statuses = [
+        ('รอดำเนินการ', 'รอดำเนินการ'),  
+        ('สำเร็จ', 'สำเร็จ'),         
+        ('ไม่สำเร็จ', 'ไม่สำเร็จ'),
+    ]
     return render(request,"staff/appointment_list.html",{
                                                          "appointments":appointments,
                                                          "page_obj":page_obj,                                       
                                                          'dentists':dentists,
                                                          'treatments':treatments,
-                                                         'today': today,})
+                                                         'today': today,
+                                                         "days": days,
+                                                         "months": months,
+                                                         "years": years,
+                                                         "statuses": statuses, 
+                                                         "selected_day": selected_day,
+                                                         "selected_month": selected_month,
+                                                         "selected_year": selected_year,
+                                                         "selected_status": selected_status,
+                                                         "query_params": query_params.urlencode()  # ส่ง Query Parameters ที่จัดการแล้วไปยัง Template
+                                                         })
 @user_passes_test(is_staff, login_url='login')
 def delete_appointment(request,id):
     appointment = get_object_or_404(Appointment,id=id)
@@ -136,7 +186,7 @@ def add_appointment(request,user_id):
             if appointment.treatment.treatmentName == "ติดเครื่องมือ":
                 # กำหนดรายละเอียดให้กับ appointment แรก
                 appointment.detail = "ครั้งที่ 1"
-                appointment.status = "รอการนัดหมาย"
+                appointment.status = "รอดำเนินการ"
                 appointment.save()
                 # สร้างนัดหมาย 29 รายการ
                 appointments = []
@@ -147,7 +197,7 @@ def add_appointment(request,user_id):
                         dentist=appointment.dentist,
                         date=None,  # ยังไม่ได้เลือกวัน
                         time_slot=None,  # ยังไม่ได้เลือกเวลา
-                        status='รอการนัดหมาย',  # สถานะเริ่มต้น
+                        status='รอดำเนินการ',  # สถานะเริ่มต้น
                         detail=f'ครั้งที่ {i}'  # ระบุรายละเอียดเป็น "ครั้งที่ i"
                     ))
 
@@ -171,6 +221,7 @@ def add_appointment(request,user_id):
 
 @user_passes_test(is_staff, login_url='login')
 def update_appointment(request,appointment_id):
+    default_redirect = reverse('staff-home')
     appointment = get_object_or_404(Appointment,id = appointment_id)
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
@@ -178,9 +229,11 @@ def update_appointment(request,appointment_id):
         form = AppointmentStatus(request.POST,instance=appointment)
         if form.is_valid():
             form.save()
+           
             return redirect('staff-home')
+        
     return render(request,'staff/edit_appointment.html',{'appointment':appointment,'dentists':dentists,
-        'treatments':treatments,})
+        'treatments':treatments,'default_redirect': default_redirect,})
 
 
 @user_passes_test(is_staff, login_url='login')

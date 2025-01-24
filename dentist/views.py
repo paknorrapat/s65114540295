@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from .forms import *
 from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test,login_required
-
+from datetime import datetime
 def is_dentist(user):
     return user.is_authenticated and user.is_dentist
 
@@ -24,11 +24,64 @@ def dentist_home(request):
     appointment_page_number = request.GET.get('appointment_page')
     appointment_page_obj = paginator.get_page(appointment_page_number)
 
+    #รับค่า filter จาก dropdown
+    selected_day = request.GET.get('day')
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+    selected_status = request.GET.get('status')  # รับค่าของ status
+
+    search = request.GET.get("search","")
+    # กรองข้อมูล
+    if search:
+        appointments = appointments.filter(Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search))
+    if selected_day:
+        appointments = appointments.filter(date__day=selected_day)
+    if selected_month:
+        appointments = appointments.filter(date__month=selected_month)
+    if selected_year:
+        appointments = appointments.filter(date__year=selected_year)
+    if selected_status:  # กรองตามสถานะ
+        appointments = appointments.filter(status=selected_status) 
+
+    # จัดการ Query Parameters (ลบ key 'page')
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        query_params.pop('page')
+    
+    #ข้อมูล dropdown
+    days = list(range(1,32))
+    # ข้อมูลเดือน (mapping)
+    months = [
+    (1, "มกราคม"), (2, "กุมภาพันธ์"), (3, "มีนาคม"), (4, "เมษายน"),
+    (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
+    (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
+    ]
+    years =range(2021,datetime.now().year + 1)
+
+    statuses = [
+        ('รอดำเนินการ', 'รอดำเนินการ'),  
+        ('สำเร็จ', 'สำเร็จ'),         
+        ('ไม่สำเร็จ', 'ไม่สำเร็จ'),
+    ]
     # pagination ทั้งหมด
     paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request,"dentist/dentist_home.html",{'appointment_page_obj': appointment_page_obj,'page_obj':page_obj,'count_appointment_today': count_appointment_today,"success_or_fail_today":success_or_fail_today,"count_appointment_all":count_appointment_all})
+    return render(request,"dentist/dentist_home.html",{'appointment_page_obj': appointment_page_obj,
+                                                       'page_obj':page_obj,
+                                                       'count_appointment_today': count_appointment_today,
+                                                       "success_or_fail_today":success_or_fail_today,
+                                                       "count_appointment_all":count_appointment_all,
+                                                       "days": days,
+                                                       "months": months,
+                                                       "years": years,
+                                                       "statuses": statuses, 
+                                                       "selected_day": selected_day,
+                                                       "selected_month": selected_month,
+                                                       "selected_year": selected_year,
+                                                       "selected_status": selected_status,
+                                                       "query_params": query_params.urlencode()  # ส่ง Query Parameters ที่จัดการแล้วไปยัง Template 
+                                                       })
 
 @user_passes_test(is_dentist, login_url='login')
 def treatment_history(request):
@@ -61,12 +114,53 @@ def treatment_history(request):
                                                             })
 @user_passes_test(is_dentist, login_url='login')
 def t_history_all(request):
-    treatment_history = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,status=True)
+    treatmenthistorys = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,status=True)
+    
+    #รับค่า filter จาก dropdown
+    selected_day = request.GET.get('day')
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+ 
+    search = request.GET.get("search","")
+    # กรองข้อมูล
+    if search:
+        treatmenthistorys = treatmenthistorys.filter(Q(appointment__user__first_name__icontains=search) | Q(appointment__user__last_name__icontains=search))
+    if selected_day:
+        treatmenthistorys = treatmenthistorys.filter(appointment__date__day=selected_day)
+    if selected_month:
+        treatmenthistorys = treatmenthistorys.filter(appointment__date__month=selected_month)
+    if selected_year:
+        treatmenthistorys = treatmenthistorys.filter(appointment__date__year=selected_year)
+
+    # จัดการ Query Parameters (ลบ key 'page')
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        query_params.pop('page')
+
     # pagination
-    paginator = Paginator(treatment_history,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
+    paginator = Paginator(treatmenthistorys,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request,"dentist/t_history_all.html",{'page_obj':page_obj})
+
+    #ข้อมูล dropdown
+    days = list(range(1,32))
+    # ข้อมูลเดือน (mapping)
+    months = [
+    (1, "มกราคม"), (2, "กุมภาพันธ์"), (3, "มีนาคม"), (4, "เมษายน"),
+    (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
+    (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
+    ]
+    years =range(2021,datetime.now().year + 1)
+
+    return render(request,"dentist/t_history_all.html",{'page_obj':page_obj,
+                                                        "days": days,
+                                                        "months": months,
+                                                        "years": years,                                                 
+                                                        "selected_day": selected_day,
+                                                        "selected_month": selected_month,
+                                                        "selected_year": selected_year,
+                                                        "query_params": query_params.urlencode()  # ส่ง Query Parameters ที่จัดการแล้วไปยัง Template
+                                                        })
 
 @user_passes_test(is_dentist, login_url='login')
 def add_treatment_history(request, apt_id):

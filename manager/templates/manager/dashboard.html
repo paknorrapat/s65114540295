@@ -32,6 +32,35 @@
         
     </div>
 </div>
+<form method="get" class="flex items-center bg-white p-6 rounded-2xl space-x-4 mb-3 w-2/3 ">
+    <label for="year" class="text-base font-medium">เลือกปี:</label>
+    <select name="year" id="year" class="select select-bordered w-40">
+        <option value="">ปีปัจจุบัน</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="month" class="text-base font-medium">เลือกเดือน:</label>
+    <select name="month" id="month" class="select select-bordered w-40">
+        <option value="">ทั้งปี</option>
+        {% for number, name in months %}
+        <option value="{{ number }}" {% if number == selected_month %}selected{% endif %}>
+            {{ name }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <label for="day" class="font-medium">เลือกวัน:</label>
+    <select name="day" id="day" class="select select-bordered w-32">
+        <option value="">ทั้งเดือน</option>
+        {% for day in days %}
+        <option value="{{ day }}" {% if day == selected_day %}selected{% endif %}>{{ day }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-outline">กรองข้อมูล</button>
+</form>
 
 <div class="flex mb-3">
     <div class=" mr-3 bg-white p-4 rounded-2xl w-1/2 ">
@@ -83,7 +112,7 @@
 
     <div class="mr-3 bg-white p-4 rounded-2xl w-1/2 ">
         <div class="ml-3 mt-1 mb-1">
-            <span class="text-blue-800">เวลายอดนิยมในสัปดาห์</span>
+            <span class="text-blue-800">ช่วงเวลายอดนิยม</span>
         </div>
         <div class="p-4 w-full ">
             <canvas id="hourChart"></canvas>

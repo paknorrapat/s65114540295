@@ -19,6 +19,11 @@
         <h1 class="text-center text-3xl font-bold">{{count_appointment_all}}</h1>
       </div>
     </div>
+    <div class=" ml-3 bg-white p-8  rounded-2xl h-8 flex items-center justify-center">
+      <a href="{% url 'appointment-all' %}">
+          <i class="fa-solid fa-right-long w-full text-2xl"></i>
+      </a> 
+    </div>
 </div>
 
 <!-- นัดหมายวันนี้-->
@@ -196,9 +201,7 @@
   <div class=" text-lg bg-white p-3 rounded-2xl w-full">
     <div class="flex ml-3 mt-1 mb-1">   
       <a href="{% url 'appointment-all' %}" class="text-lg text-blue-800">นัดหมายทั้งหมด</a>
-      <a href="{% url 'appointment-all' %}">
-        <i class="fa-solid fa-right-long w-full text-lg ml-3"></i>
-      </a> 
+  
     </div>
     <table class="table ">
       <!-- head -->
@@ -245,7 +248,15 @@
             <div class="text-xs text-center">{{apt.time_slot}}</div>
           </td>
           <td>
-            <div class=" text-center text-xs">{{apt.status}}</div>
+            <div class=" text-center text-xs">
+              {% if apt.status == 'สำเร็จ' %}
+                  <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
+              {% elif apt.status == 'ไม่สำเร็จ' %}
+                <i class="fa-regular fa-rectangle-xmark text-xl mr-2 text-red-500"></i>
+              {% else %} 
+                  {{apt.status}}
+              {% endif %}
+            </div>
           </td>
       
 

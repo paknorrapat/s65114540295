@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect,get_object_or_404,reverse
 from Sparky.models import *
 from .forms import AppointmentForm
 from django.http import JsonResponse
@@ -30,7 +30,7 @@ def member_home(request):
 
     treatments = Treatment.objects.all()
     
-    appointments = Appointment.objects.filter(user = request.user)
+    appointments = Appointment.objects.filter(user = request.user).order_by('-date')
 
     treatment_history = TreatmentHistory.objects.all()
     
@@ -243,6 +243,7 @@ def calendar_view(request):
 
 @user_passes_test(is_member, login_url='login')
 def select_appointment_date(request, appointment_id):
+    default_redirect = reverse('appointment-all')
     appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
 
     if request.method == 'POST':
@@ -258,7 +259,8 @@ def select_appointment_date(request, appointment_id):
         return redirect('appointment-all')  # ไปยังหน้ารายการนัดหมายของ Member
 
     return render(request, 'member/select_appointment_date.html', {
-        'appointment': appointment
+        'appointment': appointment,
+        'default_redirect': default_redirect,
     })
 
 @user_passes_test(is_member, login_url='login')
@@ -271,6 +273,7 @@ def delete_appointment_member(request,id):
 
 @user_passes_test(is_member, login_url='login')
 def edit_appointment_member(request,id):
+    default_redirect = reverse('appointment-all')
     appointment = get_object_or_404(Appointment,id = id)
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
@@ -282,15 +285,51 @@ def edit_appointment_member(request,id):
         else:
             form = AppointmentForm(instance=appointment)
     return render(request,'member/edit_appointment_member.html',{'appointment':appointment,'dentists':dentists,
-        'treatments':treatments,})
+        'treatments':treatments,'default_redirect': default_redirect,})
 
 @user_passes_test(is_member, login_url='login')
 def appointment_all(request):
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
-    appointments = Appointment.objects.filter(user = request.user)
+    appointments = Appointment.objects.filter(user = request.user).order_by('-date')
 
     today = now().date()
+
+    #รับค่า filter จาก dropdown
+    selected_day = request.GET.get('day')
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+    selected_status = request.GET.get('status')  # รับค่าของ status
+    # กรองข้อมูล
+    if selected_day:
+        appointments = appointments.filter(date__day=selected_day)
+    if selected_month:
+        appointments = appointments.filter(date__month=selected_month)
+    if selected_year:
+        appointments = appointments.filter(date__year=selected_year)
+    if selected_status:  # กรองตามสถานะ
+        appointments = appointments.filter(status=selected_status) 
+    # จัดการ Query Parameters (ลบ key 'page')
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        query_params.pop('page')
+
+
+    #ข้อมูล dropdown
+    days = list(range(1,32))
+    # ข้อมูลเดือน (mapping)
+    months = [
+    (1, "มกราคม"), (2, "กุมภาพันธ์"), (3, "มีนาคม"), (4, "เมษายน"),
+    (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
+    (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
+    ]
+    years =range(2021,datetime.now().year + 1)
+
+    statuses = [
+        ('รอดำเนินการ', 'รอดำเนินการ'),  
+        ('สำเร็จ', 'สำเร็จ'),         
+        ('ไม่สำเร็จ', 'ไม่สำเร็จ'),
+    ]
     # pagination
     paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
@@ -301,4 +340,15 @@ def appointment_all(request):
                                                          "page_obj":page_obj,                                       
                                                          'dentists':dentists,
                                                          'treatments':treatments,
-                                                         'today': today,})
+                                                         'today': today,
+                                                         "days": days,
+                                                         "months": months,
+                                                         "years": years,
+                                                         "statuses":statuses,                                                 
+                                                         "selected_day": selected_day,
+                                                         "selected_month": selected_month,
+                                                         "selected_year": selected_year,
+                                                         "selected_status": selected_status,
+                                                         "query_params": query_params.urlencode(),  # ส่ง Query Parameters ที่จัดการแล้วไปยัง Template
+                                                        
+                                                         })
