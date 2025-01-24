@@ -29,7 +29,7 @@
 </div>
 <form method="get" class="flex items-center space-x-4 mb-3 w-2/3 bg-white rounded-2xl p-6">
     <label for="year" class="font-medium">เลือกปี:</label>
-    <select name="year" id="year" class="select select-bordered w-32">
+    <select name="year" id="year" class="select select-bordered w-40">
         <option value="">ปีปัจจุบัน</option>
         {% for year in years %}
         <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
@@ -37,7 +37,7 @@
     </select>
 
     <label for="month" class="font-medium">เลือกเดือน:</label>
-    <select name="month" id="month" class="select select-bordered w-32">
+    <select name="month" id="month" class="select select-bordered w-40">
         <option value="">ทั้งปี</option>
         {% for number, name in months %}
         <option value="{{ number }}" {% if number == selected_month %}selected{% endif %}>{{ name }}</option>
