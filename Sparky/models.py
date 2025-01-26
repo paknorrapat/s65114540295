@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from .models import *
 from datetime import time
+from django.db.models import UniqueConstraint
 # Create your models here.
 
 GENDER_CHOICE = (
@@ -116,4 +117,14 @@ class TreatmentHistory(models.Model):
 
         return f'{user_name} : {treatment_name}'
 
+class ClosedDay(models.Model):
+    dentist = models.ForeignKey(Dentist,on_delete=models.CASCADE)
+    date = models.DateField()
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['dentist', 'date'], name='unique_dentist_date')
+        ]
+
+    def __str__(self):
+         return f"{self.dentist.user.first_name} - {self.date}"

@@ -25,5 +25,9 @@ urlpatterns = [
     path("appointment_list/",appointment_list,name="appointment-list"),
     path("member_info/",member_info,name="member-info"),
 
+    path('closed_day/',close_0ff_day,name="closed-day"),
+    path('delete_closed_day/<int:pk>/',delete_closed_day, name='delete-closed-day'),
+    path('closed_day_list/',closed_day_list,name='closed-day-list'),
+
 
 ]

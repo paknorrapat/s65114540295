@@ -11,6 +11,7 @@ from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.http import HttpResponseForbidden
 
+
 def is_member(user):
     return user.is_authenticated 
 # Create your views here.
@@ -199,6 +200,10 @@ def get_time_slots(request):
     if not dentist:
         return JsonResponse({'slots': []})
     
+    # ตรวจสอบวันปิดทำการ
+    if ClosedDay.objects.filter(dentist=dentist, date=selected_date).exists():
+        return JsonResponse({'slots': []})  # หากวันนั้นเป็นวันปิดทำการ ให้คืนค่าช่องว่าง
+    
     # ตรวจสอบว่าวันที่เลือกอยู่ในวันทำงานของทันตแพทย์หรือไม่
     selected_weekday = str(selected_date.isoweekday())  # แปลงเป็นตัวเลข (1=จันทร์, ..., 7=อาทิตย์)
     work_days = dentist.workDays.split(',')  # แปลง workDays เป็น list
@@ -224,10 +229,19 @@ def get_time_slots(request):
 
 @login_required(login_url='login')
 def calendar_view(request):
-    appointments = Appointment.objects.all().values('date', 'time_slot', 'treatment__treatmentName','dentist__user__title','dentist__user__first_name', 
-        'dentist__user__last_name')
+    dentists = Dentist.objects.all()
+    # ดึงข้อมูลการนัดหมายทั้งหมด
+    appointments = Appointment.objects.all().values(
+        'date', 
+        'time_slot', 
+        'treatment__treatmentName', 
+        'dentist__user__title', 
+        'dentist__user__first_name', 
+        'dentist__user__last_name'
+    )
     events = []
     
+    # สร้าง events สำหรับการนัดหมาย
     for appointment in appointments:
         # ตรวจสอบว่า time_slot มีค่าที่ถูกต้อง
         if appointment['time_slot']:
@@ -237,9 +251,30 @@ def calendar_view(request):
                 'start': f'{appointment["date"]}T{appointment["time_slot"]}', 
                 'allDay': False,
             })
-    
-    events_json = json.dumps(events)  # แปลง events เป็น JSON string
-    return render(request, 'appointment/calendar.html', {'events': events_json})
+    # ดึงข้อมูลวันปิดทำการจากโมเดล ClosedDay
+    closed_days = ClosedDay.objects.all().values(
+                                                    'date',
+                                                    'dentist__user__title', 
+                                                    'dentist__user__first_name', 
+                                                    'dentist__user__last_name'
+                                                )
+
+    # เพิ่ม closed days ใน events
+    for closed_day in closed_days:
+        events.append({
+            'title': f'Closed : {closed_day["dentist__user__title"]} {closed_day["dentist__user__first_name"]} {closed_day["dentist__user__last_name"]}',
+            'start': closed_day['date'].isoformat(),  # แปลงวันที่เป็น ISO string
+            'allDay': True,                           # แสดงเป็น All Day
+            'color': 'red',                           # ใช้สีแดงเพื่อแยกความแตกต่าง
+        })
+  
+    context = {
+        'events': json.dumps(events),  # แปลง events เป็น JSON string
+        'dentists': dentists
+ 
+    }
+  
+    return render(request, 'appointment/calendar.html', context)
 
 @user_passes_test(is_member, login_url='login')
 def select_appointment_date(request, appointment_id):
@@ -258,6 +293,7 @@ def select_appointment_date(request, appointment_id):
 
         return redirect('appointment-all')  # ไปยังหน้ารายการนัดหมายของ Member
 
+   
     return render(request, 'member/select_appointment_date.html', {
         'appointment': appointment,
         'default_redirect': default_redirect,

@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test,login_required
 from datetime import datetime
-
+from django.contrib import messages
 
 def is_staff(user):
     return user.is_authenticated and user.is_staff
@@ -387,4 +387,49 @@ def member_info(request):
 
     return render(request,"staff/member_info.html",{"users":users,"user_page_obj":user_page_obj})
 
+@user_passes_test(is_staff, login_url='login')
+def close_0ff_day(request):
+    if request.method == "POST":
+        date = request.POST.get('date')
+        dentist_id = request.POST.get('dentist_id')
+        
+        # ตรวจสอบข้อมูล
+        if not date or not dentist_id:
+            messages.error(request, "กรุณาเลือกวันที่และทันตแพทย์")
+            return redirect('calendar_view')
 
+        dentist = Dentist.objects.filter(id=dentist_id).first()
+        if not dentist:
+            messages.error(request, "ไม่พบทันตแพทย์ที่เลือก")
+            return redirect('calendar_view')
+
+        # ตรวจสอบว่ามีการปิดวันในวันที่เลือกแล้วหรือยัง
+        if ClosedDay.objects.filter(dentist=dentist, date=date).exists():
+            messages.error(request, f"ทันตแพทย์ {dentist.user.first_name} ได้ปิดวันทำการในวันนี้แล้ว!")
+            return redirect('calendar')
+
+        # บันทึกวันปิดทำการ
+        ClosedDay.objects.create(date=date, dentist=dentist)
+        messages.success(request, f"ปิดวันทำการสำหรับ {dentist.user.title} {dentist.user.first_name} สำเร็จแล้ว!")
+
+        # ล้าง messages หลังจากแสดงผล
+        storage = messages.get_messages(request)
+        list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
+        return redirect('calendar')
+
+@user_passes_test(is_staff, login_url='login')
+def delete_closed_day(request, pk):
+    # ตรวจสอบว่ามี ClosedDay อยู่หรือไม่
+    closed_day = get_object_or_404(ClosedDay, pk=pk)
+    closed_day.delete()  # ลบวันปิดทำการ
+    return redirect('calendar')  
+
+@user_passes_test(is_staff, login_url='login')
+def closed_day_list(request):
+    closed_days = ClosedDay.objects.all()
+
+    # pagination
+    paginator = Paginator(closed_days,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request,'staff/closed_day_list.html',{'closed_days':closed_days,'page_obj':page_obj})

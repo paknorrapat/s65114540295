@@ -129,5 +129,8 @@ def updateprofile(request, user_id):
             return redirect('profile', user_id=user.id)
         except Exception as e:
             messages.error(request, f"เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์ของคุณ: {e}")
-    
+
+    # ล้าง messages หลังจากแสดงผล
+    storage = messages.get_messages(request)
+    list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
     return render(request, 'sparky/update_profile.html', {'user': user, 'profile': profile})

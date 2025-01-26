@@ -147,13 +147,13 @@
 <!-- Modal ลบ-->
 <div id="deleteModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
   <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-    <h3 class="text-xl font-semibold mb-4">ยืนยันการลบ</h3>
+    <h3 class="text-xl text-red-600 mb-4">ยืนยันการลบ</h3>
     <p>คุณต้องการลบประเภทการรักษานี้หรือไม่?</p>
     <form id="deleteForm" method="POST">
       {% csrf_token %}
       <div class="mt-4 flex justify-end">
-        <button type="button" class="btn btn-ghost mr-2" onclick="closeDeleteModal()">ยกเลิก</button>
-        <button type="submit" class="btn btn-error">ลบ</button>
+        <button type="submit" class="btn btn-error mr-2">ลบ</button>
+        <button type="button" class="btn btn-ghost " onclick="closeDeleteModal()">ยกเลิก</button>
       </div>
     </form>
   </div>
@@ -186,7 +186,7 @@
 <!-- Modal Extra ลบ-->
 <div id="deleteModalExtra" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
   <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-    <h3 class="text-xl font-semibold mb-4">ยืนยันการลบ</h3>
+    <h3 class="text-xl  mb-4 text-red-600">ยืนยันการลบ</h3>
     <p>คุณต้องการลบรายการเพิ่มเติมนี้หรือไม่?</p>
     <form id="deleteFormExtra" method="POST">
       {% csrf_token %}
