@@ -6,7 +6,7 @@ from datetime import datetime,date,timedelta
 import json
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.db.models import Q,Sum
+from django.db.models import Q,Sum,Count
 from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.http import HttpResponseForbidden
@@ -31,7 +31,7 @@ def member_home(request):
 
     treatments = Treatment.objects.all()
     
-    appointments = Appointment.objects.filter(user = request.user).order_by('-date')
+    appointments = Appointment.objects.filter(user = request.user).order_by('-createdAt')
 
     treatment_history = TreatmentHistory.objects.all()
     
@@ -223,6 +223,7 @@ def get_time_slots(request):
 
     # ตรวจสอบ slot ที่ว่าง
     booked_appointments = Appointment.objects.filter(date=selected_date,dentist_id = dentist_id).values_list('time_slot',flat=True)
+
     available_slots = [slot.strftime('%H:%M') for slot in time_slots if slot not in booked_appointments]
 
     return JsonResponse({'slots': available_slots})
@@ -230,27 +231,66 @@ def get_time_slots(request):
 @login_required(login_url='login')
 def calendar_view(request):
     dentists = Dentist.objects.all()
-    # ดึงข้อมูลการนัดหมายทั้งหมด
-    appointments = Appointment.objects.all().values(
-        'date', 
-        'time_slot', 
-        'treatment__treatmentName', 
-        'dentist__user__title', 
-        'dentist__user__first_name', 
-        'dentist__user__last_name'
-    )
+
+    #ดึงข้อมูลการนัดหมายทั้งหมด และคำนวณจำนวนคิวที่ถูกจองในแต่ละวัน
+    appointments_per_day = Appointment.objects.values('date','dentist_id').annotate(total_appointments=Count('id'))
+
+    #เก็บจำนวนคิวที่เหลือในแต่ละวัน
+    available_slots = {}
+
+    #คำนวณจำนวนคิวที่รับได้จากเวลาเริ่มต้นและเวลาสิ้นสุดของทันตแพทย์
+    for dentist in dentists:
+        start_time = dentist.startTime
+        end_time = dentist.endTime
+        slot_duration = 60
+
+        #คำนวณจำนวนคิวที่รับได้ต่อวัน
+        total_slots = (datetime.combine(datetime.today(),end_time) - datetime.combine(datetime.today(),start_time)).seconds // (slot_duration * 60)
+
+        # ดึงวันทำงานจาก `dentist.workDays`
+        work_days = set(map(int, dentist.workDays.split(',')))  # แปลงเป็น `set(int)` [1=จันทร์, ..., 7=อาทิตย์]
+
+        # สร้างวันที่ทันตแพทย์ควรทำงานตาม `workDays`
+        today = datetime.today().date()
+        days_ahead = 60  # แสดงล่วงหน้า 60 วัน
+        working_dates = set()
+
+        for i in range(days_ahead):
+            potential_date = today + timedelta(days=i)
+            if potential_date.isoweekday() in work_days:  # ตรวจสอบว่าวันนั้นอยู่ใน workDays หรือไม่
+                working_dates.add(potential_date)
+
+        # ลบวันปิดทำการออก
+        closed_dates = set(ClosedDay.objects.filter(dentist=dentist).values_list('date', flat=True))
+        working_dates -= closed_dates  # เอาวันที่ปิดทำการออกจากวันทำงาน
+
+        #ตรวจสอบจำนวนคิวที่ถูกจองแล้ว
+        for date in working_dates:
+            booked_appointments = 0
+            for apt in appointments_per_day:
+                if apt['dentist_id'] == dentist.id and apt['date'] == date:
+                    booked_appointments = apt['total_appointments']
+                    break  # ออกจาก loop ทันทีที่เจอค่า
+            
+            remaining_slots = booked_appointments # ปรับให้คิวเหลือเริ่มจาก 0 และเพิ่มขึ้นเรื่อยๆ
+
+            available_slots[(date, dentist.id)] = {
+                'remaining': min(remaining_slots, total_slots),  # ป้องกันค่ามากกว่าที่ควร
+                'total': total_slots
+            }
+                
+
     events = []
-    
-    # สร้าง events สำหรับการนัดหมาย
-    for appointment in appointments:
-        # ตรวจสอบว่า time_slot มีค่าที่ถูกต้อง
-        if appointment['time_slot']:
-            # สร้าง start โดยไม่เพิ่ม :00 ที่เกิน
-            events.append({
-                'title': f'{appointment["treatment__treatmentName"]} : {appointment["dentist__user__title"]}{appointment["dentist__user__first_name"]} {appointment["dentist__user__last_name"]}',
-                'start': f'{appointment["date"]}T{appointment["time_slot"]}', 
-                'allDay': False,
-            })
+
+    for (date,dentist_id), slot_data in available_slots.items():
+        dentist = Dentist.objects.get(id=dentist_id)
+        events.append({
+            'title': f'{dentist.user.first_name}:{slot_data["remaining"]}/{slot_data["total"]} คิว',
+            'start': date,
+            'allDay':True,
+            'color': 'gray' if slot_data["remaining"] == slot_data["total"]  else 'green',
+        })
+   
     # ดึงข้อมูลวันปิดทำการจากโมเดล ClosedDay
     closed_days = ClosedDay.objects.all().values(
                                                     'date',
@@ -269,7 +309,7 @@ def calendar_view(request):
         })
   
     context = {
-        'events': json.dumps(events),  # แปลง events เป็น JSON string
+        'events': json.dumps(events,default=str),  # แปลง events เป็น JSON string
         'dentists': dentists
  
     }
@@ -327,7 +367,7 @@ def edit_appointment_member(request,id):
 def appointment_all(request):
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
-    appointments = Appointment.objects.filter(user = request.user).order_by('-date')
+    appointments = Appointment.objects.filter(user = request.user).order_by('-createdAt')
 
     today = now().date()
 

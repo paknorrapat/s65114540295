@@ -6,11 +6,11 @@
         <div class=" bg-white p-8 rounded-lg shadow-lg w-full ">
             <p class="mb-3 text-xl text-center font-bold">ฟอร์มนัดหมาย</p>
             <div class="flex justify-center items-center">
-                <form method="POST">
+                <form method="POST" class="w-1/4">
                     {% csrf_token %}
                     <label for="dentist" class="text-start">ชื่อทันตแพทย์</label><br>
                     <input type="text" id="dentistName" name="dentist" readonly value="{{dentist.user.title}}{{dentist.user.first_name}} {{dentist.user.last_name}}" class="input input-bordered w-full  max-w-xs my-1" />
-                    <input type="hidden" id="dentist" name="dentist" value="{{dentist.id}}" />
+                    <input type="hidden" id="dentist" name="dentist" value="{{dentist.id}}" /><br>
 
                     <label for="treatment">รายการนัดหมาย</label><br>
                     <select type="text" id="treatment" name="treatment" required class="select select-bordered w-full  max-w-xs my-1" >
@@ -28,12 +28,16 @@
                     <select id="time_slot" name="time_slot" required class="select select-bordered w-full  max-w-xs my-1">
                         <option value="">เลือกเวลา</option>
                     </select><br>
-
+                    <div class="p-3">
+                        <span class="text-sm">หมายเหตุ: ก่อนถึงวันนัดหมาย จะมีเจ้าหน้าโทรคอนเฟิร์มล่วงหน้า 1 วัน</span>
+                    </div>
                     <div class="mt-3 text-center">
                         <button class="btn bg-blue-500 text-white hover:bg-blue-400" type="submit">นัดหมาย</button>
                         <a href="{% url 'member-home' %}" class="btn btn-ghost " >ยกเลิก</a>
                     </div>
+                    
                 </form>
+                
             </div>
         </div>
     </div>

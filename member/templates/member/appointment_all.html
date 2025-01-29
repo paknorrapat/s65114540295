@@ -169,18 +169,18 @@
   <div class="flex justify-center mt-4">
     <nav class="btn-group">
         {% if page_obj.has_previous %}
-        <a href="?page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
+        <a href="?page=1&{{ query_params }}" class="btn btn-outline btn-sm">หน้าแรก</a>
+        <a href="?page={{ page_obj.previous_page_number }}&{{ query_params }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
         {% endif %}
-
+  
         <span class="btn btn-disabled btn-sm">หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}</span>
-
+  
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
+        <a href="?page={{ page_obj.next_page_number }}&{{ query_params }}" class="btn btn-outline btn-sm">ถัดไป</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}&{{ query_params }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
         {% endif %}
     </nav>
- </div>
+  </div>
   
  </div>
 </div>
