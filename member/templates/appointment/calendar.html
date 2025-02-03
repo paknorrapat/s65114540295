@@ -71,7 +71,7 @@
                         <label for="date" class="block text-sm font-medium text-gray-700">วันปิดทำการ</label>
                         <input type="date" id="date" name="date" class="input input-bordered w-full mt-2">
 
-                        <label for="dentist">ชื่อทันตแพทย์</label><br>
+                        <label for="dentist" class="mt-2 block text-sm font-medium text-gray-700">ชื่อทันตแพทย์</label>
                         <select id="dentist" name="dentist_id" required class="select select-bordered w-full mt-2 mb-3">
                             <option value="" disabled selected>เลือกทันตแพทย์</option>
                             {% for dentist in dentists %}
@@ -104,15 +104,7 @@
   function closeAddModal() {
     document.getElementById('addModal').classList.add('hidden');
   }
-  /// ลบ
-  function openDeleteModal(closedDayId) {
-    document.getElementById('deleteModal').classList.remove('hidden');
-    document.getElementById('deleteForm').action = `/delete_closed_day/${closedDayId}/`; 
-  }
-
-  function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-  }
+ 
 </script>
 
 {% endblock %}

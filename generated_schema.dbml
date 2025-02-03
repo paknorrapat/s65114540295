@@ -1,0 +1,114 @@
+Table user {
+  id integer
+  password varchar
+  last_login timestamp
+  username varchar
+  first_name varchar
+  last_name varchar
+  date_joined timestamp
+  email varchar
+  title varchar
+}
+
+Table profile {
+  id integer
+  user_id integer [note: 'foreign key to user']
+  idCard varchar
+  phone varchar
+  address text
+  gender varchar
+  height integer
+  bloodType varchar
+  ud varchar
+  allergic varchar
+}
+
+Table treatment {
+  id integer
+  treatmentName varchar
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table dentist {
+  id integer
+  user_id integer [note: 'foreign key to user']
+  workDays varchar
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table appointment {
+  id integer
+  user_id integer [note: 'foreign key to user']
+  treatment_id integer [note: 'foreign key to treatment']
+  dentist_id integer [note: 'foreign key to dentist']
+  status varchar
+  detail varchar
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table extra {
+  id integer
+  extraName varchar
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table treatmenthistory {
+  id integer
+  appointment_id integer [note: 'foreign key to appointment']
+  description text
+}
+
+Table closedday {
+  id integer
+  dentist_id integer [note: 'foreign key to dentist']
+}
+
+Table logentry {
+  id integer
+  action_time timestamp
+  user_id integer [note: 'foreign key to user']
+  content_type_id integer [note: 'foreign key to contenttype']
+  object_id text
+  object_repr varchar
+  action_flag integer
+  change_message text
+}
+
+Table permission {
+  id integer
+  name varchar
+  content_type_id integer [note: 'foreign key to contenttype']
+  codename varchar
+}
+
+Table group {
+  id integer
+  name varchar
+}
+
+Table contenttype {
+  id integer
+  app_label varchar
+  model varchar
+}
+
+Table session {
+  session_key varchar
+  session_data text
+  expire_date timestamp
+}
+
+Ref: profile.user_id > user.id // many-to-one
+Ref: dentist.user_id > user.id // many-to-one
+Ref: appointment.user_id > user.id // many-to-one
+Ref: appointment.treatment_id > treatment.id // many-to-one
+Ref: appointment.dentist_id > dentist.id // many-to-one
+Ref: treatmenthistory.appointment_id > appointment.id // many-to-one
+Ref: closedday.dentist_id > dentist.id // many-to-one
+Ref: logentry.user_id > user.id // many-to-one
+Ref: logentry.content_type_id > contenttype.id // many-to-one
+Ref: permission.content_type_id > contenttype.id // many-to-one

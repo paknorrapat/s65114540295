@@ -18,7 +18,7 @@ BLOOD_TYPE_CHOICES =(
 )
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    is_staff = models.BooleanField(default=False,verbose_name='ผนักงานหน้าเคาน์เตอร์')
+    is_staff = models.BooleanField(default=False,verbose_name='พนักงานหน้าเคาน์เตอร์')
     is_dentist = models.BooleanField(default=False,verbose_name='ทันตแพทย์')
     is_manager = models.BooleanField(default=False,verbose_name='ผู้จัดการ')
     title = models.CharField(max_length=30,verbose_name="คำนำหน้าชื่อ")

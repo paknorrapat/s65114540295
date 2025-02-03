@@ -11,7 +11,7 @@
               type="text" 
               name="search" 
               placeholder="ค้นหาชื่อสมาชิก..."
-              class=" text-sm border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 p-1 w-1/3"
+              class=" text-sm border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 p-1 ml-2 w-1/3"
               value="{{ request.GET.search }}">
             <button type="submit" class="text-blue-500">
               <i class="fa-solid fa-magnifying-glass"></i>
@@ -109,7 +109,7 @@
             <div class="mb-4">
                 <label for="role" class="mb-2 text-sm font-medium">เลือกบทบาท:</label>
                 <select name="role" id="role" class="select select-bordered w-full">
-                    <option value="Staff">ผนักงาน</option>
+                    <option value="Staff">พนักงาน</option>
                     <option value="Dentist">ทันตแพทย์</option>
                     <option value="Member">สมาชิก</option>
                 </select>
