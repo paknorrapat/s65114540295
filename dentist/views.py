@@ -114,7 +114,7 @@ def treatment_history(request):
                                                             })
 @user_passes_test(is_dentist, login_url='login')
 def t_history_all(request):
-    treatmenthistorys = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,status=True)
+    treatmenthistorys = TreatmentHistory.objects.filter(appointment__dentist=request.user.dentist,status=True).order_by('-appointment__date')
     
     #รับค่า filter จาก dropdown
     selected_day = request.GET.get('day')
