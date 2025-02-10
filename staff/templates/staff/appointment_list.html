@@ -6,7 +6,10 @@
 <!-- นัดหมายทั้งหมด-->
 <div class="mr-3">
   <div class=" bg-white p-4  rounded-2xl w-full">
-    <div class="ml-3 mt-1 mb-1">
+    <div class="flex ml-3 mt-1 mb-1">
+      <a href="{% url 'staff-home' %}">
+        <i class="fa-solid fa-left-long w-full text-lg mr-3 mt-1"></i>
+      </a>
       <span class="text-lg text-blue-800">นัดหมายทั้งหมด</span>
     </div>
 
@@ -109,9 +112,11 @@
             <div class="flex items-center gap-3">
               <div class="avatar">
                 <div class="mask mask-squircle h-12 w-12">
-                  <img
-                    src="{{apt.user.profile.image.url}}"
-                    alt="รูปโปรไฟล์ของผู้ใช้" />
+                  {% if apt.user.profile.image %}
+                    <img src="{{apt.user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้">
+                  {% else %}
+                    <i class="fa-solid fa-user-circle text-gray-500 text-5xl "></i>
+                  {% endif %}
                 </div>
               </div>
               <div>

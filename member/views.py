@@ -85,7 +85,7 @@ def get_day_name(day_numbers):
 
 @login_required(login_url='login')
 def t_history(request,user_id):
-    t_history = TreatmentHistory.objects.filter(appointment__user = user_id)
+    t_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
     # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
     if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
         return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงประวัติการรักษานี้")
@@ -98,7 +98,7 @@ def t_history(request,user_id):
 
 @login_required(login_url='login')
 def braces_progress(request,user_id):
-    treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id)
+    treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
     braces = treatment_history.filter(appointment__treatment__is_braces=True)
 
      # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
@@ -179,6 +179,7 @@ def appointment_view(request,dentist_id):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             appointment = form.save(commit=False)
+
             appointment.user = request.user
             appointment.dentist = dentist  # กำหนด Dentist ที่เลือก
             appointment.save()
@@ -190,12 +191,25 @@ def appointment_view(request,dentist_id):
 
 @login_required(login_url='login')
 def get_time_slots(request):
+
     date_str = request.GET.get('date')
-    dentist_id = request.GET.get('dentist_id')  # รับ dentist_id เพื่อกรองเวลาสำหรับทันตแพทย์เฉพาะ
+    dentist_id = request.GET.get('dentist_id')  # รับ dentist_id เพื่อกรองเวลาสำหรับทันตแพทย์เฉพาะ 
+
+    if request.user.is_staff:
+        user_id = request.GET.get('user_id')
+    else:
+        user_id = request.user.id  
+       
     if not date_str:
         return JsonResponse({'slots':[]})
     
     selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+    # ดักไม่ให้นัดหมายย้อนหลัง (วันที่ต้องไม่ก่อนวันที่ปัจจุบัน)
+    today = datetime.today().date()
+    if selected_date < today:
+        return JsonResponse({'slots': []})  # หากวันที่ที่เลือกย้อนหลัง ให้คืนค่าช่องว่าง
+
     dentist = Dentist.objects.filter(id=dentist_id).first()
     if not dentist:
         return JsonResponse({'slots': []})
@@ -210,6 +224,10 @@ def get_time_slots(request):
     if selected_weekday not in work_days:
         return JsonResponse({'slots': []})  # หากวันไม่อยู่ในวันทำงาน ให้คืนค่าช่องว่าง
 
+
+    if Appointment.objects.filter(date=selected_date,user=user_id).exists():
+        return JsonResponse({'slots':[]})
+    
     # ช่วงเวลาทำงานของทันตแพทย์
     start_time = dentist.startTime  # เวลาเริ่มทำงาน
     end_time = dentist.endTime      # เวลาสิ้นสุดการทำงาน
@@ -328,10 +346,10 @@ def select_appointment_date(request, appointment_id):
         # บันทึกวันและเวลาที่เลือก
         appointment.date = selected_date
         appointment.time_slot = selected_time
-        appointment.status = 'รอดำเนินการ'  # เปลี่ยนสถานะเป็นยืนยัน
+        appointment.status = 'รอดำเนินการ'  
         appointment.save()
 
-        return redirect('appointment-all')  # ไปยังหน้ารายการนัดหมายของ Member
+        return redirect('appointment-all')  
 
    
     return render(request, 'member/select_appointment_date.html', {
@@ -349,7 +367,6 @@ def delete_appointment_member(request,id):
 
 @user_passes_test(is_member, login_url='login')
 def edit_appointment_member(request,id):
-    default_redirect = reverse('appointment-all')
     appointment = get_object_or_404(Appointment,id = id)
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
@@ -361,13 +378,13 @@ def edit_appointment_member(request,id):
         else:
             form = AppointmentForm(instance=appointment)
     return render(request,'member/edit_appointment_member.html',{'appointment':appointment,'dentists':dentists,
-        'treatments':treatments,'default_redirect': default_redirect,})
+        'treatments':treatments,})
 
 @user_passes_test(is_member, login_url='login')
 def appointment_all(request):
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
-    appointments = Appointment.objects.filter(user = request.user).order_by('-createdAt')
+    appointments = Appointment.objects.filter(user=request.user).order_by('-date')
 
     today = now().date()
 

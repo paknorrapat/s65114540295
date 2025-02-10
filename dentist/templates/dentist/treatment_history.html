@@ -48,9 +48,11 @@
             <div class="flex items-center gap-3">
               <div class="avatar">
                 <div class="mask mask-squircle h-12 w-12">
-                  <img
-                    src="{{apt.user.profile.image.url}}"
-                    alt="รูปโปรไฟล์ของผู้ใช้" />
+                  {% if apt.user.profile.image %}
+                    <img src="{{apt.user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้">
+                  {% else %}
+                    <i class="fa-solid fa-user-circle text-gray-500 text-5xl "></i>
+                  {% endif %}
                 </div>
               </div>
               <div>
@@ -70,6 +72,7 @@
             <div class="text-xs text-center">{{apt.time_slot}}</div>
           </td>
           <th class="flex justify-center items-center mt-3.5">
+          
               {% if apt.treatmenthistory.status %}
               <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
               {% elif apt.status == 'สำเร็จ' %}
@@ -129,9 +132,11 @@
             <div class="flex items-center gap-3">
               <div class="avatar">
                 <div class="mask mask-squircle h-12 w-12">
-                  <img
-                    src="{{apt.user.profile.image.url}}"
-                    alt="รูปโปรไฟล์ของผู้ใช้" />
+                  {% if apt.user.profile.image %}
+                    <img src="{{apt.user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้">
+                  {% else %}
+                    <i class="fa-solid fa-user-circle text-gray-500 text-5xl "></i>
+                  {% endif %}
                 </div>
               </div>
               <div>

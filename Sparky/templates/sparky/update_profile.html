@@ -10,9 +10,13 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}  
                 <div class="flex flex-wrap">
-                    <div class="w-1/2 p-2">
+                    <div class="w-1/2 p-6">
                         <div class="my-2  flex justify-center">
+                            {% if request.user.profile.image %}
                             <img src="{{user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้" class="w-32 h-32 rounded-full object-cover">
+                            {% else %}
+                                <i class="fa-solid fa-user-circle text-gray-500 text-6xl"></i>
+                            {% endif %}
                         </div>
 
                         <div class="my-2">
@@ -40,24 +44,12 @@
                         </div>
                         <input type="email" id="email" name="email"  value="{{user.email}}" class="input input-bordered w-full  h-9" required/>
                                     
-                        <div class="my-2">
-                            <label>เลขประจำตัวประชาชน</label>
-                        </div>
-                        <input id="idCard" name="idCard" maxlength="13" pattern="\d{13}" value="{{user.profile.idCard}}" required class="input input-bordered w-full h-9" />
-                                    
+                               
                         <div class="my-2">
                             <label>เบอร์โทร</label>
                         </div>
                         <input  id="phone" name="phone" maxlength="10" pattern="\d{10}" value="{{ user.profile.phone }}" required class="input input-bordered w-full h-9" />
                                 
-                        <div class="my-2">
-                            <label>ที่อยู่</label>
-                        </div>
-                        <textarea id="address" name="address" type="textarea" class="textarea textarea-bordered w-full h-20" required>{{user.profile.address}}</textarea>
-                                
-                    </div>
-                                
-                    <div class="w-1/2 p-2 mt-5">      
                         <div class="my-2">
                             <label>วันเกิด</label>
                         </div>
@@ -70,6 +62,10 @@
                             <option value="ชาย" {% if user.profile.gender == "ชาย" %}selected{% endif %}>ชาย</option>
                             <option value="หญิง" {% if user.profile.gender == "หญิง" %}selected{% endif %}>หญิง</option>
                         </select>
+                    </div>
+                                
+                    <div class="w-1/2 p-2 mt-5">      
+                        
                                 
                         <div class="my-2">
                             <label>น้ำหนัก</label>
@@ -91,15 +87,26 @@
                             <option value="O" {% if user.profile.bloodType == "O" %}selected{% endif %}>O</option>
                         </select>
                                 
-                        <div class="my-2">
+                        <div class="my-2 text-red-500">
                             <label>โรคประจำตัว</label>
                         </div>
                         <input id="ud" name="ud" value="{{user.profile.ud}}"  class="input input-bordered w-full  h-9" required/>
+
+                        <div class="my-2 text-red-500">
+                            <label>อาการโรคประจำตัว</label>  
+                        </div>
+                        <textarea id="ud_symptoms" name="ud_symptoms" class="textarea textarea-bordered w-full h-20">{{user.profile.ud_symptoms}}</textarea>
+            
                                 
-                        <div class="my-2">
+                        <div class="my-2 text-red-500">
                             <label>ข้อมูลการแพ้ยา</label>
                         </div>
                         <input id="allergic" name="allergic" value="{{user.profile.allergic}}" class="input input-bordered w-full  h-9" required/>
+
+                        <div class="my-2 text-red-500">
+                            <label>อาการแพ้ยา</label> 
+                        </div>
+                        <textarea id="allergic_symptoms" name="allergic_symptoms" class="textarea textarea-bordered w-full h-20">{{user.profile.allergic_symptoms}}</textarea>
 
                         <div class="my-2">
                             <label>รูปตนเอง</label>

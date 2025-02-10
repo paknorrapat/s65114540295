@@ -98,9 +98,11 @@
           <div class="flex items-center gap-3">
             <div class="avatar">
               <div class="mask mask-squircle h-12 w-12">
-                <img
-                  src="{{apt.user.profile.image.url}}"
-                  alt="รูปโปรไฟล์ของผู้ใช้" />
+                {% if request.user.profile.image %}
+                    <img src="{{user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้">
+                {% else %}
+                    <i class="fa-solid fa-user-circle text-gray-500 text-5xl "></i>
+                {% endif %}
               </div>
             </div>
             <div>
@@ -149,12 +151,7 @@
               <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
             </a>
           {% else %}
-            <a href="{% url 'member-appointment-edit' apt.id%}">
-              <i class="fa-solid fa-pen-to-square text-xl mr-2 text-black-500 "></i>
-            </a>
-            <a href="#" onclick="openDeleteModal('{{ apt.id }}')">
-              <i class="fa-solid fa-trash text-xl mr-2 text-black-500"></i>
-            </a>
+      
           {% endif %}
         </td>
     

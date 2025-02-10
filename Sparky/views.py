@@ -72,7 +72,9 @@ def register(request):
             messages.error(request, 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอก')
     else:
         form = RegisterForm()
-
+    # ล้าง messages หลังจากแสดงผล
+    storage = messages.get_messages(request)
+    list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
     return render(request,'registration/register.html',{'form':form})
 
 def profile(request,user_id):
@@ -84,10 +86,10 @@ def profile(request,user_id):
             profile.user = user
             profile.save()
             return redirect('login')
-        
+              
     else:
         profile_form = ProfileForm()
-    
+
     return render(request,'registration/profile_form.html',{'profile_form':profile_form})
 
 @login_required(login_url='login')
@@ -117,6 +119,8 @@ def updateprofile(request, user_id):
         profile.ud = request.POST.get('ud')
         profile.allergic = request.POST.get('allergic')
         profile.birthDate = request.POST.get('birthDate')
+        profile.ud_symptoms = request.POST.get('ud_symptoms')
+        profile.allergic_symptoms = request.POST.get('allergic_symptoms')
         
         # อัปเดตรูปภาพโปรไฟล์ถ้ามีการอัปโหลด
         if 'image' in request.FILES:

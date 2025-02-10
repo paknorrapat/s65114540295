@@ -14,7 +14,7 @@
                 <input type="text" id="dentist" name="dentist" value="{{treatment_history.appointment.dentist.user.title}}{{treatment_history.appointment.dentist.user.first_name}} {{treatment_history.appointment.dentist.user.last_name}}"  readonly class="input input-bordered w-full my-2" >
                     
                 <label for="treatment">ประเภทการรักษา</label><br>
-                <input type="text" id="treatment" name="treatment" value="{{treatment_history.appointment.treatment.treatmentName}}"  class="input input-bordered w-full  my-2" >
+                <input type="text" id="treatment" name="treatment"  readonly value="{{treatment_history.appointment.treatment.treatmentName}}"  class="input input-bordered w-full  my-2" >
 
                 <label for="description">รายละเอียดการรักษา</label><br>
                 <textarea id="description" name="description"  required class="textarea textarea-bordered w-full max-w-lg h-32 my-2">{{treatment_history.description}}</textarea>

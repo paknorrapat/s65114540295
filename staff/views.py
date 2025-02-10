@@ -144,10 +144,20 @@ def delete_appointment(request,id):
 def add_appointment(request,user_id):
      # ตรวจสอบว่า user_id ถูกต้องหรือไม่
     user = get_object_or_404(User, id=user_id)
+    
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
 
     treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id)
+
+    dentist_braces = TreatmentHistory.objects.filter(appointment__user = user_id,appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True
+    )
+   
+    # ดึงชื่อทันตแพทย์ในรูปแบบที่อ่านง่าย
+    dentist_name_list = [
+        f"{dentist['appointment__dentist__user__title']}{dentist['appointment__dentist__user__first_name']} {dentist['appointment__dentist__user__last_name']}"
+        for dentist in dentist_braces.values('appointment__dentist__user__title', 'appointment__dentist__user__first_name','appointment__dentist__user__last_name')
+    ]
 
     # ตรวจสอบสถานะของ "ปรึกษาวางแผนจัดฟัน"
     step1_completed = treatment_history.filter(
@@ -175,6 +185,7 @@ def add_appointment(request,user_id):
     step5_completed = treatment_history.filter(
         appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True
     ).exists()
+
     if request.method == 'POST':
         form = AppointmentForm(request.POST)
         if form.is_valid():
@@ -208,7 +219,7 @@ def add_appointment(request,user_id):
     else:
         form = AppointmentForm()
     return render(request,'staff/add_appointment.html',{'user': user,
-                                                         'dentists':dentists,
+                                                        'dentists':dentists,
                                                         'treatments':treatments,
                                                         "step1_completed": step1_completed,
                                                          "step2_completed": step2_completed,
@@ -217,11 +228,12 @@ def add_appointment(request,user_id):
                                                          "step4_count": step4_count,
                                                          "step4_total": step4_total,
                                                          "step5_completed": step5_completed,
+                                                         'dentist_names': dentist_name_list,
+                                                       
                                                         })
 
 @user_passes_test(is_staff, login_url='login')
 def update_appointment(request,appointment_id):
-    default_redirect = reverse('staff-home')
     appointment = get_object_or_404(Appointment,id = appointment_id)
     dentists = Dentist.objects.all() 
     treatments = Treatment.objects.all()
@@ -230,10 +242,10 @@ def update_appointment(request,appointment_id):
         if form.is_valid():
             form.save()
            
-            return redirect('staff-home')
+            return redirect('appointment-list')
         
     return render(request,'staff/edit_appointment.html',{'appointment':appointment,'dentists':dentists,
-        'treatments':treatments,'default_redirect': default_redirect,})
+        'treatments':treatments,})
 
 
 @user_passes_test(is_staff, login_url='login')
@@ -426,7 +438,7 @@ def delete_closed_day(request, pk):
 
 @user_passes_test(is_staff, login_url='login')
 def closed_day_list(request):
-    closed_days = ClosedDay.objects.all()
+    closed_days = ClosedDay.objects.all().order_by('-date')
 
     # pagination
     paginator = Paginator(closed_days,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า

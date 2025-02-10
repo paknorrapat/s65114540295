@@ -25,23 +25,25 @@ class User(AbstractUser):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
-    idCard = models.CharField(max_length=13,verbose_name='เลขประจำตัวประชาชน')
-    phone = models.CharField(max_length=10,verbose_name='เบอร์โทรศัพท์มือถือ')
-    address = models.TextField(max_length=500,verbose_name='ที่อยู่')
-    birthDate = models.DateField(verbose_name='วันเกิด')
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="ชาย", verbose_name='เพศ')
+    idCard = models.CharField(max_length=13,verbose_name='เลขประจำตัวประชาชน',blank=True, null=True,unique=True)
+    phone = models.CharField(max_length=10,verbose_name='เบอร์โทรศัพท์มือถือ',blank=True, null=True)
+    address = models.TextField(max_length=500,verbose_name='ที่อยู่',blank=True, null=True)
+    birthDate = models.DateField(verbose_name='วันเกิด',blank=True, null=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="ชาย", verbose_name='เพศ',blank=True, null=True)
     weight = models.FloatField(blank=True,null=True,verbose_name='น้ำหนัก')
     height = models.IntegerField(blank=True,null=True,verbose_name='ส่วนสูง')
     bloodType = models.CharField(max_length=10,choices=BLOOD_TYPE_CHOICES,verbose_name='หมู่เลือด')
     ud = models.CharField(max_length=500,blank=True,null=True,verbose_name='โรคประจำตัว')
+    ud_symptoms = models.CharField(max_length=500, blank=True, null=True, verbose_name='อาการโรคประจำตัว')
     image = models.ImageField(upload_to='Image',blank=True,null=True,verbose_name='รูปภาพ')
     allergic = models.CharField(max_length=500,blank=True,null=True,verbose_name='ข้อมูลการแพ้ยา')
+    allergic_symptoms = models.CharField(max_length=500, blank=True, null=True, verbose_name='อาการแพ้ยา')
 
-    def clean(self):
-        if len(self.idCard) != 13:
-            raise ValidationError('เลขประจำตัวประชาชนต้องมีความยาว 13 หลัก')
-        if self.phone and len(self.phone) != 10:
-            raise ValidationError('เบอร์โทรศัพท์มือถือต้องมีความยาว 10 หลัก')
+    # def clean(self):
+    #     if len(self.idCard) != 13:
+    #         raise ValidationError('เลขประจำตัวประชาชนต้องมีความยาว 13 หลัก')
+    #     if self.phone and len(self.phone) != 10:
+    #         raise ValidationError('เบอร์โทรศัพท์มือถือต้องมีความยาว 10 หลัก')
         
     def __str__(self) :
         return self.user.first_name +" "+self.user.last_name
@@ -85,7 +87,6 @@ class Appointment(models.Model):
     updatedAt = models.DateTimeField(auto_now=True, blank=False)
 
     def __str__(self):
-        user_name = self.user.username if self.user else 'Unknown User'
         treatment_name = self.treatment.treatmentName if self.treatment else 'No Treatment'
         return f'{self.user.first_name if self.user else "Unknown"} {self.user.last_name if self.user else ""} : {treatment_name} on {self.date} at {self.time_slot}'
 

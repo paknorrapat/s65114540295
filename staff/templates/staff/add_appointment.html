@@ -14,6 +14,9 @@
                 <h3 class="text-base text-blue-800 mb-4">สถานะการจัดฟัน</h3>
                 {% if step1_completed %}
                     <div class="space-y-4">
+                        {% for dentist in dentist_names %}
+                        <p class="text-sm">ชื่อทันตแพทย์:{{ dentist }}</p>  <!-- แสดงชื่อทันตแพทย์ -->
+                        {% endfor %}
                         <!-- ขั้นที่ 1: ปรึกษาวางแผน -->
                         <div class="flex items-center gap-4">
                             {% if step1_completed %}
@@ -88,6 +91,7 @@
                             </div>
                             <span class="text-base font-medium text-gray-500">ขั้นที่ 5: ถอดเครื่องมือ</span>
                             {% endif %}
+                            
                         </div>
                     </div>
                 {% else %}
@@ -104,8 +108,8 @@
                     <div class="space-y-4">
                         <div>
                             <label for="user" class="block text-sm font-medium text-gray-700">ชื่อคนไข้</label>
-                            <input type="text" id="userName" name="user"  readonly value="{{user.title}}{{user.first_name}} {{user.last_name}}" class="input input-bordered w-full">
-                            <input type="hidden" id="userId" name="user"  value="{{user.id}}">
+                            <input type="text" id="userName" name="userName"  readonly value="{{user.title}}{{user.first_name}} {{user.last_name}}" class="input input-bordered w-full">
+                            <input type="hidden" id="user" name="user" value="{{user.id}}">
                         </div>
                         <div>
                             <label for="dentist" class="block text-sm font-medium text-gray-700">ชื่อทันตแพทย์</label>
@@ -145,9 +149,15 @@
     </div>
 </div>
 <script>
-
+    // ปรับค่า min ของวันที่ให้ไม่สามารถเลือกวันย้อนหลังได้
+    document.addEventListener('DOMContentLoaded', function() {
+        var today = new Date().toISOString().split('T')[0];  // รับวันที่ปัจจุบัน
+        document.getElementById('date').setAttribute('min', today);  // กำหนด min ให้เป็นวันที่ปัจจุบัน
+    });
+    
     ///วันเวลา///
     function updateTimeSlots() {
+        var selectedPatient = document.getElementById('user').value;
         var selectedDate = document.getElementById('date').value;
         var selectedDentist = document.getElementById('dentist').value;
         var timeSlotSelect = document.getElementById('time_slot');
@@ -158,7 +168,7 @@
         // ตรวจสอบว่ามีการเลือกทั้งวันที่และทันตแพทย์
         if (selectedDate && selectedDentist) {
             // ดึงข้อมูล Slot เวลาจาก Server โดยใช้ Ajax
-            fetch(`/member/get-time-slots/?date=${selectedDate}&dentist_id=${selectedDentist}`)
+            fetch(`/member/get-time-slots/?date=${selectedDate}&dentist_id=${selectedDentist}&user_id=${selectedPatient}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);

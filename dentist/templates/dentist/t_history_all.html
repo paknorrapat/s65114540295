@@ -98,9 +98,11 @@
               <div class="flex items-center gap-3">
                 <div class="avatar">
                   <div class="mask mask-squircle h-12 w-12">
-                    <img
-                      src="{{th.appointment.user.profile.image.url}}"
-                      alt="รูปโปรไฟล์ของผู้ใช้" />
+                    {% if th.appointment.user.profile.image %}
+                      <img src="{{th.appointment.user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้">
+                    {% else %}
+                      <i class="fa-solid fa-user-circle text-gray-500 text-5xl "></i>
+                    {% endif %}
                   </div>
                 </div>
                 <div>
@@ -171,7 +173,8 @@
         <p><strong>ชื่อ:</strong> <span id="modalPatientName"></span></p>
         <p><strong>ชื่อทันตแพทย์:</strong> <span id="modalDentistName"></span></p>
         <p><strong>ประเภทการรักษา:</strong> <span id="modalTreatmentName"></span></p>
-        <p><strong>รายละเอียด:</strong> <span id="modalDescription"></span></p>
+        <p><strong>รายละเอียด:</strong> </p>
+        <span id="modalDescription"></span>
         <p><strong>ค่าใช้จ่ายทั้งหมด:</strong> <span id="modalCost"></span> บาท</p>
         <div class="mt-4 flex justify-end">
             <button class="btn bg-blue-500 text-white hover:bg-blue-400" onclick="closeHistoryModal()">ปิด</button>

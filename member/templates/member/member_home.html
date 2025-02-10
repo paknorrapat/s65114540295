@@ -51,9 +51,11 @@
               <div class="flex items-center gap-3">
                 <div class="avatar">
                   <div class="mask mask-squircle h-12 w-12">
-                    <img
-                      src="{{apt.user.profile.image.url}}"
-                      alt="รูปโปรไฟล์ของผู้ใช้" />
+                    {% if request.user.profile.image %}
+                    <img src="{{user.profile.image.url}}" alt="รูปโปรไฟล์ของผู้ใช้">
+                    {% else %}
+                        <i class="fa-solid fa-user-circle text-gray-500 text-5xl "></i>
+                    {% endif %}
                   </div>
                 </div>
                 <div>
@@ -194,95 +196,6 @@
         
       </div>
     </div>
-  </div>
-</div>
-<!-- นัดหมายทั้งหมด-->
-<div class="mr-3">
-  <div class=" text-lg bg-white p-3 rounded-2xl w-full">
-    <div class="flex ml-3 mt-1 mb-1">   
-      <a href="{% url 'appointment-all' %}" class="text-lg text-blue-800">นัดหมายทั้งหมด</a>
-  
-    </div>
-    <table class="table ">
-      <!-- head -->
-      <thead>
-        <tr>
-          <th class="text-center">ชื่อ-นามสกุล</th>
-          <th class="text-center">รายการ</th>
-          <th class="text-center">วัน</th>
-          <th class="text-center">เวลา</th>
-          <th class="text-center">สถานะ</th>
-        
-        </tr>
-      </thead>
-      <tbody>
-        {% for apt in aptall_page_obj %}
-        <!-- row 1 -->
-        <tr>
-          <td>
-            <div class="flex items-center gap-3">
-              <div class="avatar">
-                <div class="mask mask-squircle h-12 w-12">
-                  <img
-                    src="{{apt.user.profile.image.url}}"
-                    alt="รูปโปรไฟล์ของผู้ใช้" />
-                </div>
-              </div>
-              <div>
-                <div class="text-sm">{{apt.user.title}}{{apt.user.first_name}} {{apt.user.last_name}}</div>
-              </div>
-            </div>
-          </td>
-          <td class="text-center">
-            {% if apt.detail %}
-            <div class="text-xs">{{apt.detail}} {{apt.treatment}}</div>
-            {% else %}
-            <div class="text-xs">{{apt.treatment}}</div>
-            {% endif %}
-            <div class="badge badge-ghost badge-sm">{{apt.dentist.user.title}}{{apt.dentist.user.first_name}} {{apt.dentist.user.last_name}}</div>
-          </td>
-          <td>
-            <div class="text-xs text-center">{{apt.date}}</div>
-          </td>
-          <td>
-            <div class="text-xs text-center">{{apt.time_slot}}</div>
-          </td>
-          <td>
-            <div class=" text-center text-xs">
-              {% if apt.status == 'สำเร็จ' %}
-                  <i class="fa-solid fa-square-check text-xl mr-2 text-green-500"></i>
-              {% elif apt.status == 'ไม่สำเร็จ' %}
-                <i class="fa-regular fa-rectangle-xmark text-xl mr-2 text-red-500"></i>
-              {% else %} 
-                  {{apt.status}}
-              {% endif %}
-            </div>
-          </td>
-      
-
-          
-        </tr>      
-      {% endfor %}
-      </tbody>
-      
-      
-    </table>
-    <div class="flex justify-center mt-4">
-      <nav class="btn-group">
-          {% if aptall_page_obj.has_previous %}
-          <a href="?aptall_page=1" class="btn btn-outline btn-sm">หน้าแรก</a>
-          <a href="?aptall_page={{ aptall_page_obj.previous_page_number }}" class="btn btn-outline btn-sm">ก่อนหน้า</a>
-          {% endif %}
-
-          <span class="btn btn-disabled btn-sm">หน้า {{ aptall_page_obj.number }} จาก {{ aptall_page_obj.paginator.num_pages }}</span>
-
-          {% if aptall_page_obj.has_next %}
-          <a href="?aptall_page={{ aptall_page_obj.next_page_number }}" class="btn btn-outline btn-sm">ถัดไป</a>
-          <a href="?aptall_page={{ aptall_page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">หน้าสุดท้าย</a>
-          {% endif %}
-      </nav>
-    </div>
-    
   </div>
 </div>
 

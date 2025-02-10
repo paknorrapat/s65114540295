@@ -14,7 +14,7 @@ def dentist_home(request):
     # ฟิลเตอร์นัดหมายที่มีวันที่ตรงกับวันนี้ 
     today = timezone.now().date()
     appointment_today = Appointment.objects.filter(date=today,dentist=request.user.dentist).order_by('time_slot')
-    appointments = Appointment.objects.filter(dentist=request.user.dentist)
+    appointments = Appointment.objects.filter(dentist=request.user.dentist).order_by('-date')
 
     count_appointment_all =appointments.count()
     count_appointment_today =appointment_today.count()
@@ -90,7 +90,7 @@ def treatment_history(request):
     appointment_today = Appointment.objects.filter(date=today,dentist=request.user.dentist,status='สำเร็จ').order_by('time_slot')
     appointments = Appointment.objects.filter(dentist=request.user.dentist,status='สำเร็จ',treatmenthistory__status=True)
 
-    t_history = Appointment.objects.filter(dentist=request.user.dentist,status='สำเร็จ')
+    t_history = Appointment.objects.filter(dentist=request.user.dentist,status='สำเร็จ').order_by('-date')
 
     count_th_all =appointments.count()
     count_th_today =appointment_today.count()

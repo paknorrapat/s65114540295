@@ -15,7 +15,8 @@ class RegisterForm(UserCreationForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['idCard','phone','address','birthDate','gender','weight','height','bloodType','ud','image','allergic']
+        fields = ['idCard','phone','address','birthDate','gender','weight','height','bloodType','ud','image','allergic','ud_symptoms','allergic_symptoms']
+
 
 class UserForm(forms.ModelForm):
     class Meta:

@@ -15,21 +15,13 @@
                     <!-- ฟิลด์ hidden สำหรับส่งค่า user.id -->
                     <input type="hidden" name="user" value="{{ appointment.user.id }}">
 
-                    <label for="dentist">ชื่อทันตแพทย์</label><br>
-                    <select id="dentist" name="dentist" required class="select select-bordered w-full max-w-xs my-1">
-                        <option value="" disabled >เลือกทันตแพทย์</option> 
-                        {% for dentist in dentists %}
-                            <option value="{{ dentist.id }}" {% if dentist.id == appointment.dentist.id %}selected{% endif %}>{{ dentist.user.title }}{{ dentist.user.first_name }} {{ dentist.user.last_name }}</option>
-                        {% endfor %}
-                    </select>
+                    <label for="dentist" >ชื่อทันตแพทย์</label><br>
+                    <input type="text" id="dentistName" name="dentist" readonly value="{{appointment.dentist.user.title}}{{appointment.dentist.user.first_name}} {{appointment.dentist.user.last_name}}" class="input input-bordered w-full  max-w-xs my-1" />
+                    <input type="hidden" id="dentist" name="dentist" value="{{appointment.dentist.id}}" /><br>
 
-                    <label for="treatment">รายการนัดหมาย</label><br>
-                    <select type="text" id="treatment" name="treatment" required class="select select-bordered w-full  max-w-xs my-1" >
-                        <option value="" disabled >เลือกรายการ</option> 
-                            {% for treatment in treatments %}
-                                <option value="{{treatment.id}}" {% if treatment.id == appointment.treatment.id %}selected{% endif %}>{{treatment.treatmentName}}</option>
-                            {% endfor%}
-                    </select><br>
+                    <label for="treatment" >รายการนัดหมาย</label><br>
+                    <input type="text" id="treatmentName" name="treatmentName" readonly value="{{appointment.treatment.treatmentName}}" class="input input-bordered w-full  max-w-xs my-1" />
+                    <input type="hidden" id="treatment" name="treatment" value="{{appointment.treatment.id}}" />
 
                     <label for="date">วันที่นัดหมาย</label><br>
                     <input type="date" id="date" name="date" value="{{ appointment.date|date:'Y-m-d' }}" class="input input-bordered w-full  max-w-xs my-1" />
@@ -53,7 +45,7 @@
 
                     <div class="mt-3 text-center">
                         <button class="btn bg-blue-500 text-white hover:bg-blue-400 mr-2" type="submit">บันทึกข้อมูล</button>
-                        <a href="{{ request.META.HTTP_REFERER|default:default_redirect }}" class="btn btn-ghost " >ยกเลิก</a>
+                        <a href="{% url 'appointment-list' %}" class="btn btn-ghost " >ยกเลิก</a>
                     </div>
                 </form>
             </div>
@@ -61,66 +53,60 @@
     </div>
 </div>
 <script>
-    function updateTimeSlots() {
-        var selectedDate = document.getElementById('date').value;
-        var selectedDentist = document.getElementById('dentist').value;
-        var timeSlotSelect = document.getElementById('time_slot');
-        var currentSelectedTime = "{{ appointment.time_slot }}"; // เวลาเดิมที่เลือกไว้
-
-        // ล้าง Time Slot เก่า
-        timeSlotSelect.innerHTML = '<option value="">เลือกเวลา</option>';
-
-        // ตรวจสอบว่ามีการเลือกทั้งวันที่และทันตแพทย์
-        if (selectedDate && selectedDentist) {
-            // ดึงข้อมูล Slot เวลาจาก Server โดยใช้ Ajax
-            fetch(`/member/get-time-slots/?date=${selectedDate}&dentist_id=${selectedDentist}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    let isCurrentTimeInSlots = false;
-
-                    if (data.slots && data.slots.length > 0) {
-                        data.slots.forEach(function(slot) {
-                            var option = document.createElement('option');
-                            option.value = slot;
-                            option.textContent = slot;
-
-                            // ตรวจสอบว่าเวลาที่เลือกไว้ยังอยู่ใน Slot ที่ดึงมา
-                            if (slot === currentSelectedTime) {
-                                option.selected = true;
-                                isCurrentTimeInSlots = true;
-                            }
-
-                            timeSlotSelect.appendChild(option);
-                        });
-                    }
-
-                    // ถ้าเวลาที่เลือกไว้ไม่อยู่ใน Slot ใหม่ ให้เพิ่มกลับเข้าไป
-                    if (!isCurrentTimeInSlots && currentSelectedTime) {
-                        var fallbackOption = document.createElement('option');
-                        fallbackOption.value = currentSelectedTime;
-                        fallbackOption.textContent = currentSelectedTime + " (เลือกไว้)";
-                        fallbackOption.selected = true;
-                        timeSlotSelect.appendChild(fallbackOption);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching time slots:', error);
-                });
-        }
-    }
-
-    // เชื่อม Event กับ Date และ Dentist Dropdown
-    document.getElementById('date').addEventListener('change', updateTimeSlots);
-    document.getElementById('dentist').addEventListener('change', updateTimeSlots);
-
-    // เมื่อหน้าโหลดให้โหลด slot เวลาทั้งหมด
+    // ปรับค่า min ของวันที่ให้ไม่สามารถเลือกวันย้อนหลังได้
     document.addEventListener('DOMContentLoaded', function() {
-        updateTimeSlots();
+        var today = new Date().toISOString().split('T')[0];  // รับวันที่ปัจจุบัน
+        document.getElementById('date').setAttribute('min', today);  // กำหนด min ให้เป็นวันที่ปัจจุบัน
     });
+
+
+    function updateTimeSlots() {
+
+    var selectedDate = document.getElementById('date').value;
+    var selectedDentist = document.getElementById('dentist').value;
+    var timeSlotSelect = document.getElementById('time_slot');
+
+    // ล้าง Time Slot เก่า
+    timeSlotSelect.innerHTML = '<option value="">เลือกเวลา</option>';
+
+    // ตรวจสอบว่ามีการเลือกทั้งวันที่และทันตแพทย์
+    if (selectedDate && selectedDentist) {
+        // ดึงข้อมูล Slot เวลาจาก Server โดยใช้ Ajax
+        fetch(`/member/get-time-slots/?date=${selectedDate}&dentist_id=${selectedDentist}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.slots && data.slots.length > 0) {
+                    data.slots.forEach(function(slot) {
+                        var option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slot;
+                        timeSlotSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching time slots:', error);
+            });
+    }
+}
+
+// เชื่อม Event กับ Date และ Dentist Dropdown
+document.getElementById('date').addEventListener('change', function() {
+    // เมื่อมีการเปลี่ยนวัน, ลบเวลาเดิม
+    document.getElementById('time_slot').value = '';  // ลบการเลือกเวลา
+    updateTimeSlots();  // อัปเดตเวลาใหม่
+});
+
+document.getElementById('dentist').addEventListener('change', updateTimeSlots);
+
+// เมื่อหน้าโหลดให้โหลด slot เวลาทั้งหมด
+document.addEventListener('DOMContentLoaded', function() {
+    updateTimeSlots();
+});
 </script>
 {% endblock %}

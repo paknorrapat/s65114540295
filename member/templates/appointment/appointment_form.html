@@ -8,9 +8,11 @@
             <div class="flex justify-center items-center">
                 <form method="POST" class="w-1/4">
                     {% csrf_token %}
+
                     <label for="dentist" class="text-start">ชื่อทันตแพทย์</label><br>
                     <input type="text" id="dentistName" name="dentist" readonly value="{{dentist.user.title}}{{dentist.user.first_name}} {{dentist.user.last_name}}" class="input input-bordered w-full  max-w-xs my-1" />
                     <input type="hidden" id="dentist" name="dentist" value="{{dentist.id}}" /><br>
+
 
                     <label for="treatment">รายการนัดหมาย</label><br>
                     <select type="text" id="treatment" name="treatment" required class="select select-bordered w-full  max-w-xs my-1" >
@@ -42,7 +44,13 @@
         </div>
     </div>
 </div>
-<script>
+<script>    
+    // ปรับค่า min ของวันที่ให้ไม่สามารถเลือกวันย้อนหลังได้
+    document.addEventListener('DOMContentLoaded', function() {
+        var today = new Date().toISOString().split('T')[0];  // รับวันที่ปัจจุบัน
+        document.getElementById('date').setAttribute('min', today);  // กำหนด min ให้เป็นวันที่ปัจจุบัน
+    });
+
      ///วันเวลา///
      function updateTimeSlots() {
         var selectedDate = document.getElementById('date').value;
