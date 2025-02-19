@@ -6,6 +6,7 @@ from .forms import *
 from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test,login_required
 from datetime import datetime
+
 def is_dentist(user):
     return user.is_authenticated and user.is_dentist
 

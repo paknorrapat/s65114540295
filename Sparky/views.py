@@ -12,6 +12,9 @@ def firstpage(request):
     return render(request,"firstpage.html")
 
 def calculate_age(birth_date):
+    if birth_date is None:  # ตรวจสอบว่ามีค่า birth_date หรือไม่
+        return ""  # ถ้าไม่มีวันเกิด ให้คืนค่า ""
+    
     today = datetime.now().date()
     age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
     return age
@@ -24,6 +27,7 @@ def showprofile(request, user_id):
     if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
         return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")
     
+
     age = calculate_age(user.profile.birthDate)  # คำนวณอายุ
     
     

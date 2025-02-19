@@ -11,7 +11,6 @@ from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.http import HttpResponseForbidden
 
-
 def is_member(user):
     return user.is_authenticated 
 # Create your views here.
@@ -162,14 +161,6 @@ def braces_progress(request,user_id):
                                                          "percentage_paid": round(percentage_paid, 2),
                                                          "max_cost": max_cost,
                                                          })
-
-@user_passes_test(is_member, login_url='login')
-def delete_appointment_member(request,id):
-    appointment = get_object_or_404(Appointment,id=id)
-    if request.method == 'POST':
-        appointment.delete()
-        return redirect('member-home')
-    return redirect('member-home')
 
 @user_passes_test(is_member, login_url='login')
 def appointment_view(request,dentist_id):

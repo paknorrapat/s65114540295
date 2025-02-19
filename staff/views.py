@@ -13,6 +13,9 @@ from django.contrib import messages
 def is_staff(user):
     return user.is_authenticated and user.is_staff
 
+def is_dentist(user):
+    return user.is_authenticated and user.is_dentist
+
 @user_passes_test(is_staff, login_url='login')
 def staff_home(request):
     search = request.GET.get("search","")
@@ -384,7 +387,8 @@ def edit_extra(request,extra_id):
             return redirect("treatment-manage")
     return render(request,"staff/edit_extra.html",{"extra":extra})
 
-@login_required
+@user_passes_test(is_staff, login_url='login')
+@user_passes_test(is_dentist, login_url='login')
 def member_info(request):
     search = request.GET.get("search","")
     if search:

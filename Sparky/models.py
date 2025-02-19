@@ -39,11 +39,6 @@ class Profile(models.Model):
     allergic = models.CharField(max_length=500,blank=True,null=True,verbose_name='ข้อมูลการแพ้ยา')
     allergic_symptoms = models.CharField(max_length=500, blank=True, null=True, verbose_name='อาการแพ้ยา')
 
-    # def clean(self):
-    #     if len(self.idCard) != 13:
-    #         raise ValidationError('เลขประจำตัวประชาชนต้องมีความยาว 13 หลัก')
-    #     if self.phone and len(self.phone) != 10:
-    #         raise ValidationError('เบอร์โทรศัพท์มือถือต้องมีความยาว 10 หลัก')
         
     def __str__(self) :
         return self.user.first_name +" "+self.user.last_name
