@@ -13,8 +13,8 @@ from django.contrib import messages
 def is_staff(user):
     return user.is_authenticated and user.is_staff
 
-def is_dentist(user):
-    return user.is_authenticated and user.is_dentist
+def is_staff_or_dentist(user):
+    return user.is_authenticated and (user.is_staff or getattr(user, 'is_dentist', False))
 
 @user_passes_test(is_staff, login_url='login')
 def staff_home(request):
@@ -387,8 +387,7 @@ def edit_extra(request,extra_id):
             return redirect("treatment-manage")
     return render(request,"staff/edit_extra.html",{"extra":extra})
 
-@user_passes_test(is_staff, login_url='login')
-@user_passes_test(is_dentist, login_url='login')
+@user_passes_test(is_staff_or_dentist, login_url='login')
 def member_info(request):
     search = request.GET.get("search","")
     if search:
@@ -437,8 +436,9 @@ def close_0ff_day(request):
 def delete_closed_day(request, pk):
     # ตรวจสอบว่ามี ClosedDay อยู่หรือไม่
     closed_day = get_object_or_404(ClosedDay, pk=pk)
-    closed_day.delete()  # ลบวันปิดทำการ
-    return redirect('calendar')  
+    if request.method == 'POST':
+        closed_day.delete()  # ลบวันปิดทำการ
+        return redirect('calendar')  
 
 @user_passes_test(is_staff, login_url='login')
 def closed_day_list(request):
@@ -449,3 +449,20 @@ def closed_day_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request,'staff/closed_day_list.html',{'closed_days':closed_days,'page_obj':page_obj})
+
+@user_passes_test(is_staff, login_url='login')
+def update_status_appointment(request):
+    if request.method == "POST":
+        appointment_id = request.POST.get("appointment_id")
+        status = request.POST.get("status")
+
+        # หานัดหมายที่มี id ตรงกับ appointment_id
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+
+         # อัปเดตสถานะของนัดหมาย
+        if status in ['รอดำเนินการ', 'สำเร็จ', 'ไม่สำเร็จ']:  
+            appointment.status = status
+            appointment.save()  # บันทึกการเปลี่ยนแปลง
+            return redirect('staff-home')  # เปลี่ยนเส้นทางไปยังหน้ารายการนัดหมาย
+        else:
+            return redirect('staff-home')  # หรือเพิ่มข้อความแสดงข้อผิดพลาด

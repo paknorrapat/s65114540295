@@ -12,6 +12,14 @@
                 {% for history in page_obj %}
                 <div class="bg-white shadow-base rounded-lg p-5 border-2  ">
                     <div class="flex justify-between items-center">
+                        
+                        <div class="ml-2 text-right">
+                            <p class="text-xs text-gray-700">
+                                วันที่ทำการรักษา {{ history.appointment.date }}
+
+                            </p>
+                        </div>
+
                         {% if history.appointment.detail%}
                         <h3 class="text-sm  text-blue-800">
                             {{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }}
@@ -19,13 +27,7 @@
                         {% else %}
                         <h3 class="text-sm  text-blue-800">
                            {{ history.appointment.treatment.treatmentName }}
-                        </h3>
-                        {% endif %}
-                        
-                        <div class="ml-4 text-right">
-                            <p class="text-xs text-gray-700">
-                                วันที่ทำการรักษา {{ history.appointment.date }}
-                                <a class="ml-2 "  href="javascript:void(0);" 
+                           <a class="ml-2 "  href="javascript:void(0);" 
                                 onclick="openHistoryModal(
                                     '{{ history.appointment.user.title }}{{ history.appointment.user.first_name }} {{ history.appointment.user.last_name }}',
                                     '{{ history.appointment.dentist.user.title }}{{ history.appointment.dentist.user.first_name }} {{ history.appointment.dentist.user.last_name }}',
@@ -35,8 +37,8 @@
                                     '{{ history.description|escapejs }}')">
                                     <i class="fa-solid fa-circle-chevron-right text-xl text-blue-800"></i>
                                 </a>
-                            </p>
-                        </div>
+                        </h3>
+                        {% endif %}
                     </div>
                     
                 </div>

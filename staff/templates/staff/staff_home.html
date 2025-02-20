@@ -79,7 +79,7 @@
                 </td>
                 <th class="flex justify-center items-center mt-3.5">
                   {% if apt.status == 'รอดำเนินการ' %}
-                  <a href="{% url 'appointment-update' apt.id%}">
+                  <a href="#" onclick="openModal({{ apt.id }},'{{apt.status|escapejs}}')">
                     <i class="fa-solid fa-square-plus text-xl mr-2 text-blue-500"></i>
                   </a>
       
@@ -194,6 +194,30 @@
     </div>
 </div>
 
+<!-- Modal สำหรับการอัปเดตสถานะ -->
+<div id="updateStatusModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-1/4">
+      <h3 class="text-lg font-medium text-blue-800 mb-4">เปลี่ยนสถานะการนัดหมาย</h3>
+      <form id="updateStatusForm" method="POST">
+          {% csrf_token %}
+          <!-- ใส่ hidden field สำหรับ appointment_id -->
+          <input type="hidden" id="appointment_id" name="appointment_id">
+
+          <label for="status">สถานะ</label><br>
+          <select id="status" name="status" class="select select-bordered w-full  my-1">
+              <option value="รอดำเนินการ">รอดำเนินการ</option>
+              <option value="สำเร็จ">สำเร็จ</option>
+              <option value="ไม่สำเร็จ">ไม่สำเร็จ</option>
+          </select><br>
+
+          <div class="mt-4 flex justify-end">
+              <button type="submit" class="btn bg-blue-500 text-white hover:bg-blue-400 mr-2">บันทึก</button>
+              <button type="button" class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+          </div>
+      </form>
+  </div>
+</div>
+
 <script>
   
     ///วันเวลา///
@@ -237,6 +261,26 @@
     document.getElementById('date').addEventListener('change', updateTimeSlots);
     document.getElementById('dentist').addEventListener('change', updateTimeSlots);
 
+
+    function openModal(aptId, currentStatus) {
+    // ตั้งค่าค่าเริ่มต้นในฟอร์ม
+    document.getElementById('appointment_id').value = aptId;
+
+    // ตั้งค่าบทบาทปัจจุบันใน select
+    const statusSelect = document.getElementById('status');
+    if (statusSelect) {
+        statusSelect.value = currentStatus;  // ตั้งค่าสถานะปัจจุบัน
+    }
+
+    // แสดง modal
+    document.getElementById('updateStatusModal').classList.remove('hidden');
+    document.getElementById('updateStatusForm').action = `/staff/update_status_appointment/`;  // ฟอร์มจะส่งไปยัง URL นี้
+}
+
+  function closeModal() {
+      // ซ่อน modal
+      document.getElementById('updateStatusModal').classList.add('hidden');
+  }
 
 </script>
 {% endblock %}

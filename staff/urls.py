@@ -29,5 +29,7 @@ urlpatterns = [
     path('delete_closed_day/<int:pk>/',delete_closed_day, name='delete-closed-day'),
     path('closed_day_list/',closed_day_list,name='closed-day-list'),
 
+    path('update_status_appointment/',update_status_appointment,name='update-status-appointment')
+
 
 ]

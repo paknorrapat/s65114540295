@@ -25,7 +25,7 @@
 
                                 <div class="mt-4 flex justify-center">
                                 <button type="submit" class="btn bg-blue-500 text-white hover:bg-blue-400 mr-2">เพิ่มวันเวลา</button>
-                                <a href="{{ request.META.HTTP_REFERER|default:default_redirect }}" class="btn btn-ghost " >ยกเลิก</a>
+                                <a href="{% url 'appointment-all' %}" class="btn btn-ghost " >ยกเลิก</a>
                                 </div>
                     </div>
                 </form>

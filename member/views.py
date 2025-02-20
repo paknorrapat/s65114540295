@@ -327,7 +327,7 @@ def calendar_view(request):
 
 @user_passes_test(is_member, login_url='login')
 def select_appointment_date(request, appointment_id):
-    default_redirect = reverse('appointment-all')
+  
     appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
 
     if request.method == 'POST':
@@ -342,10 +342,10 @@ def select_appointment_date(request, appointment_id):
 
         return redirect('appointment-all')  
 
-   
+
     return render(request, 'member/select_appointment_date.html', {
         'appointment': appointment,
-        'default_redirect': default_redirect,
+
     })
 
 @user_passes_test(is_member, login_url='login')
