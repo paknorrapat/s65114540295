@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404,reverse
-from Sparky.models import *
+from Sparky.models import Dentist,Treatment,Appointment,TreatmentHistory,ClosedDay
 from .forms import AppointmentForm
 from django.http import JsonResponse
 from datetime import datetime,date,timedelta
@@ -28,12 +28,8 @@ def member_home(request):
         # แปลง workDays เป็นชื่อวันในภาษาไทย
         dentist.workDaysThai = get_day_name(dentist.workDays)
 
-    treatments = Treatment.objects.all()
-    
     appointments = Appointment.objects.filter(user = request.user).order_by('-createdAt')
 
-    treatment_history = TreatmentHistory.objects.all()
-    
     # ฟิลเตอร์นัดหมายที่มีวันที่ตรงกับวันนี้ 
     today = timezone.now().date()
     appointment_today = Appointment.objects.filter(user = request.user,date=today).order_by('time_slot')
@@ -52,23 +48,17 @@ def member_home(request):
     user_page_number = request.GET.get('user_page')
     user_page_obj = paginator2.get_page(user_page_number)
 
-    # pagination 3
-    paginator3 = Paginator(appointments,5) # แบ่งเป็นหน้า 5 รายการต่อหน้า
-    aptall_page_number = request.GET.get('aptall_page')
-    aptall_page_obj = paginator3.get_page(aptall_page_number)
 
-    return render(request,"member/member_home.html",{
+    context = {
         "appointment_today":appointment_today,
-        'aptall_page_obj' : aptall_page_obj,
         'appointment_page_obj': appointment_page_obj,
         'user_page_obj': user_page_obj,
         'dentists':dentists,
-        'treatments':treatments,
-        'treatment_history':treatment_history,
         'count_appointment_today': count_appointment_today,
         "success_or_fail_today":success_or_fail_today,
         "count_appointment_all":count_appointment_all,
-    })
+    }
+    return render(request,"member/member_home.html",context)
 
 def get_day_name(day_numbers):
     days_map = {
@@ -84,30 +74,34 @@ def get_day_name(day_numbers):
 
 @login_required(login_url='login')
 def t_history(request,user_id):
-    t_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
-    # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
     if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
         return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงประวัติการรักษานี้")
     
-     # pagination
+    t_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
+        
+    # pagination
     paginator = Paginator(t_history,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request,"member/t_history.html",{'page_obj':page_obj})
+    
+    context= {
+        'page_obj':page_obj
+    }
+    return render(request,"member/t_history.html",context)
 
 @login_required(login_url='login')
 def braces_progress(request,user_id):
-    treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
-    braces = treatment_history.filter(appointment__treatment__is_braces=True)
-
-     # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
     if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
         return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงสถานะการจัดฟันนี้")
+    
+    treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
+    braces = treatment_history.filter(appointment__treatment__is_braces=True)
     
      # pagination
     paginator = Paginator(braces,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
     # คำนวณค่าใช้จ่ายทั้งหมดสำหรับการจัดฟัน
     total_cost = treatment_history.filter(appointment__treatment__is_braces=True).aggregate(total=Sum('cost'))['total'] or 0
 
@@ -146,21 +140,21 @@ def braces_progress(request,user_id):
         appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True
     ).exists()
 
-    
-    return render(request,"member/braces_progress.html",{"treatment_history": treatment_history,
-                                                         "step1_completed": step1_completed,
-                                                         "step2_completed": step2_completed,
-                                                         "step3_completed": step3_completed,
-                                                         "step4_completed": step4_completed,
-                                                         "step4_count": step4_count,
-                                                         "step4_total": step4_total,
-                                                         "step5_completed": step5_completed,
-                                                         "total_cost":total_cost,
-                                                         "braces":braces,
-                                                         'page_obj':page_obj,
-                                                         "percentage_paid": round(percentage_paid, 2),
-                                                         "max_cost": max_cost,
-                                                         })
+    context = {"treatment_history": treatment_history,
+               "step1_completed": step1_completed,
+               "step2_completed": step2_completed,
+               "step3_completed": step3_completed,
+               "step4_completed": step4_completed,
+               "step4_count": step4_count,
+               "step4_total": step4_total,
+               "step5_completed": step5_completed,
+               "total_cost":total_cost,
+               "braces":braces,
+               'page_obj':page_obj,
+               "percentage_paid": round(percentage_paid, 2),
+               "max_cost": max_cost,
+              }
+    return render(request,"member/braces_progress.html",context)
 
 @user_passes_test(is_member, login_url='login')
 def appointment_view(request,dentist_id):
@@ -178,7 +172,12 @@ def appointment_view(request,dentist_id):
     else:
         form = AppointmentForm()
     
-    return render(request,'appointment/appointment_form.html',{'form':form,'dentist':dentist,'treatments':treatments})
+    context = {
+        'form':form,
+        'dentist':dentist,
+        'treatments':treatments
+    }
+    return render(request,'appointment/appointment_form.html',context)
 
 @login_required(login_url='login')
 def get_time_slots(request):
@@ -368,8 +367,13 @@ def edit_appointment_member(request,id):
             return redirect('appointment-all')
         else:
             form = AppointmentForm(instance=appointment)
-    return render(request,'member/edit_appointment_member.html',{'appointment':appointment,'dentists':dentists,
-        'treatments':treatments,})
+
+    context = {
+        'appointment':appointment,
+        'dentists':dentists,
+        'treatments':treatments,
+    }
+    return render(request,'member/edit_appointment_member.html',context)
 
 @user_passes_test(is_member, login_url='login')
 def appointment_all(request):

@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect,get_object_or_404,reverse
 from django.utils import timezone
 from django.core.paginator import Paginator
 from .forms import *
-from .models import *
+from Sparky.models import Dentist,User,Treatment,Appointment,ClosedDay,Extra
 from django.http import JsonResponse,HttpResponseRedirect
 from django.db.models import Q
 from django.utils.timezone import now
@@ -307,14 +307,17 @@ def edit_dentist(request,dentist_id):
     if request.method == 'POST' :
         form = DentistForm(request.POST,instance=dentist)
         if form.is_valid():
-             # รับค่า workDays ที่เลือกทั้งหมด
             work_days = request.POST.getlist('workDays')  # ใช้ getlist เพื่อรับค่าหลายค่า
             dentist.workDays = ",".join(work_days)  # เก็บค่า workDays เป็น string ที่แยกด้วยเครื่องหมายจุลภาค
             form.save()
             return redirect('dentist-manage')
     else:
         form = DentistForm(instance=dentist)
-    return render(request,'staff/edit_dentist.html',{'dentist':dentist})
+
+    context = { 
+        'dentist':dentist
+    }
+    return render(request,'staff/edit_dentist.html',context)
 
 @user_passes_test(is_staff, login_url='login')
 def treatment_manage(request): 
@@ -358,7 +361,11 @@ def edit_treatment(request,treatment_id):
         if form.is_valid():
             form.save()
             return redirect("treatment-manage")
-    return render(request,"staff/edit_treatment.html",{"treatment":treatment})
+    
+    context ={
+        "treatment":treatment
+    }
+    return render(request,"staff/edit_treatment.html",context)
 
 @user_passes_test(is_staff, login_url='login')
 def add_extra(request):
@@ -385,7 +392,11 @@ def edit_extra(request,extra_id):
         if form.is_valid():
             form.save()
             return redirect("treatment-manage")
-    return render(request,"staff/edit_extra.html",{"extra":extra})
+        
+    context = {
+        "extra":extra
+    }
+    return render(request,"staff/edit_extra.html",context)
 
 @user_passes_test(is_staff_or_dentist, login_url='login')
 def member_info(request):
@@ -395,12 +406,14 @@ def member_info(request):
     else :
         users = User.objects.filter(is_dentist=False,is_manager=False,is_staff=False)
 
-    # pagination 2
     paginator2 = Paginator(users,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     user_page_number = request.GET.get('user_page')
     user_page_obj = paginator2.get_page(user_page_number)
 
-    return render(request,"staff/member_info.html",{"users":users,"user_page_obj":user_page_obj})
+    context = {
+        "users":users,"user_page_obj":user_page_obj
+    }
+    return render(request,"staff/member_info.html",context)
 
 @user_passes_test(is_staff, login_url='login')
 def close_0ff_day(request):
@@ -408,28 +421,14 @@ def close_0ff_day(request):
         date = request.POST.get('date')
         dentist_id = request.POST.get('dentist_id')
         
-        # ตรวจสอบข้อมูล
-        if not date or not dentist_id:
-            messages.error(request, "กรุณาเลือกวันที่และทันตแพทย์")
-            return redirect('calendar_view')
-
         dentist = Dentist.objects.filter(id=dentist_id).first()
-        if not dentist:
-            messages.error(request, "ไม่พบทันตแพทย์ที่เลือก")
-            return redirect('calendar_view')
-
+     
         # ตรวจสอบว่ามีการปิดวันในวันที่เลือกแล้วหรือยัง
         if ClosedDay.objects.filter(dentist=dentist, date=date).exists():
-            messages.error(request, f"ทันตแพทย์ {dentist.user.first_name} ได้ปิดวันทำการในวันนี้แล้ว!")
             return redirect('calendar')
 
         # บันทึกวันปิดทำการ
         ClosedDay.objects.create(date=date, dentist=dentist)
-        messages.success(request, f"ปิดวันทำการสำหรับ {dentist.user.title} {dentist.user.first_name} สำเร็จแล้ว!")
-
-        # ล้าง messages หลังจากแสดงผล
-        storage = messages.get_messages(request)
-        list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
         return redirect('calendar')
 
 @user_passes_test(is_staff, login_url='login')
@@ -455,14 +454,10 @@ def update_status_appointment(request):
     if request.method == "POST":
         appointment_id = request.POST.get("appointment_id")
         status = request.POST.get("status")
-
-        # หานัดหมายที่มี id ตรงกับ appointment_id
         appointment = get_object_or_404(Appointment, id=appointment_id)
-
-         # อัปเดตสถานะของนัดหมาย
         if status in ['รอดำเนินการ', 'สำเร็จ', 'ไม่สำเร็จ']:  
             appointment.status = status
-            appointment.save()  # บันทึกการเปลี่ยนแปลง
-            return redirect('staff-home')  # เปลี่ยนเส้นทางไปยังหน้ารายการนัดหมาย
+            appointment.save()  
+            return redirect('staff-home')  
         else:
-            return redirect('staff-home')  # หรือเพิ่มข้อความแสดงข้อผิดพลาด
+            return redirect('staff-home')  

@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from Sparky.models import *
+from Sparky.models import TreatmentHistory,Appointment,Extra,Treatment
 from django.utils import timezone
 from django.core.paginator import Paginator
 from .forms import *
@@ -178,25 +178,28 @@ def add_treatment_history(request, apt_id):
             treatmenthistory.save()
 
             return redirect("treatment-history")
-        
-    return render(request, 'dentist/add_t_history.html', {
+    
+    context = {
         'extras': extras,
         'appointment': appointment,
         'treatments': treatments,
-    })
+    }
+    return render(request, 'dentist/add_t_history.html',context)
 
 @user_passes_test(is_dentist, login_url='login')
 def update_treatment_history(request,treatment_history_id):
-    # ดึง TreatmentHistory ที่ต้องการอัปเดต
     treatment_history = get_object_or_404(TreatmentHistory, id=treatment_history_id)
     if request.method == "POST":
         form = TreatmentHistoryForm(request.POST,instance=treatment_history)
         if form.is_valid():
             treatmenthistory = form.save(commit=False)
-            treatment_history.status = True  # ตั้งค่า status เป็น True
+            treatment_history.status = True  
             treatmenthistory.save()
             return redirect("t-history-all")
     else:
-        # GET request: สร้างฟอร์มพร้อมข้อมูลเดิม
         form = TreatmentHistoryForm(instance=treatment_history)
-    return render(request,"dentist/update_t_history.html",{'treatment_history':treatment_history})
+        
+    context = {
+        'treatment_history':treatment_history
+    }
+    return render(request,"dentist/update_t_history.html",context)

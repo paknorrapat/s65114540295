@@ -76,9 +76,11 @@ def register(request):
             messages.error(request, 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอก')
     else:
         form = RegisterForm()
+
     # ล้าง messages หลังจากแสดงผล
     storage = messages.get_messages(request)
     list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
+
     return render(request,'registration/register.html',{'form':form})
 
 def profile(request,user_id):
@@ -98,47 +100,34 @@ def profile(request,user_id):
 
 @login_required(login_url='login')
 def updateprofile(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    # ตรวจสอบว่าเป็นเจ้าของข้อมูล, staff, หรือ dentist
-    if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
+    if request.user.id != user_id :
         return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")
+    
+    user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(Profile, user=user)
     
     if request.method == 'POST':
-        # อัปเดตฟิลด์ของผู้ใช้
-        user.username = request.POST.get('username')
-        user.email = request.POST.get('email')
-        user.title = request.POST.get('title')
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
         
-        # อัปเดตฟิลด์ของโปรไฟล์
-        profile.idCard = request.POST.get('idCard')
-        profile.phone = request.POST.get('phone')
-        profile.address = request.POST.get('address')
-        profile.gender = request.POST.get('gender')
-        profile.weight = request.POST.get('weight')
-        profile.height = request.POST.get('height')
-        profile.bloodType = request.POST.get('bloodType')
-        profile.ud = request.POST.get('ud')
-        profile.allergic = request.POST.get('allergic')
-        profile.birthDate = request.POST.get('birthDate')
-        profile.ud_symptoms = request.POST.get('ud_symptoms')
-        profile.allergic_symptoms = request.POST.get('allergic_symptoms')
-        
-        # อัปเดตรูปภาพโปรไฟล์ถ้ามีการอัปโหลด
-        if 'image' in request.FILES:
-            profile.image = request.FILES['image']
-        # บันทึกการเปลี่ยนแปลงในผู้ใช้และโปรไฟล์
-        try:
-            user.save()
-            profile.save()
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
             messages.success(request, 'อัปเดตโปรไฟล์สำเร็จแล้ว')
             return redirect('profile', user_id=user.id)
-        except Exception as e:
-            messages.error(request, f"เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์ของคุณ: {e}")
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
 
+          
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    context = {
+        'user': user, 
+        'profile': profile
+    }
     # ล้าง messages หลังจากแสดงผล
     storage = messages.get_messages(request)
     list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
-    return render(request, 'sparky/update_profile.html', {'user': user, 'profile': profile})
+    return render(request, 'sparky/update_profile.html', context)

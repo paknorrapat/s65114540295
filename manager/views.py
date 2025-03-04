@@ -1,10 +1,10 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from Sparky.models import *
+from Sparky.models import User,Appointment,TreatmentHistory,Profile
 from django.core.paginator import Paginator
 from .forms import *
 from django.db.models import Q,Count,Sum
 from datetime import datetime
-from django.db.models.functions import TruncMonth,ExtractDay, ExtractHour, ExtractWeekDay
+from django.db.models.functions import TruncMonth, ExtractHour, ExtractWeekDay
 from django.utils.timezone import now,localtime
 from django.contrib.auth.decorators import user_passes_test,login_required
 
@@ -209,6 +209,7 @@ def second_dashboard(request):
         .annotate(total_revenue=Sum('cost'))
         .order_by('month')
     )
+
     # รายได้รวมแยกตามประเภทการรักษา
     revenue_by_treatment = (
         TreatmentHistory.objects.filter(**date_filter)
@@ -243,6 +244,7 @@ def second_dashboard(request):
      # แมปตัวเลขเดือนเป็นชื่อเดือนภาษาไทย
     month_names = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
                    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
+    
     for month in revenue_by_month:
         month_number = month['month'].month
         month['month_name'] = month_names[month_number - 1]
@@ -252,28 +254,31 @@ def second_dashboard(request):
         month['month_name'] = month_names[month_number - 1]
 
     # สร้างตัวเลือกปี, เดือน, และวัน
-    years = range(2022, now().year + 1)
+    years = range(2024, now().year + 1)
     months = [
         (1, "มกราคม"), (2, "กุมภาพันธ์"), (3, "มีนาคม"), (4, "เมษายน"),
         (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
         (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
     ]
     days = range(1, 32)
-    return render(request,'manager/second_dashboard.html',{'revenue_by_month': revenue_by_month,
-                                                           'revenue_by_treatment':revenue_by_treatment,
-                                                           'treatment_popularity': treatment_popularity,
-                                                           'appointments_by_month': appointments_by_month,
-                                                           'appointments_by_status': appointments_by_status,
-                                                           'total_income_today': total_income_today,
-                                                           'total_income_month': total_income_month,
-                                                           'total_income_all': total_income_all,
-                                                            'years': years,
-                                                            'months': months,
-                                                            'days': days,
-                                                            'selected_year': selected_year,
-                                                            'selected_month': selected_month,
-                                                            'selected_day': selected_day,                                                          
-                                                          })
+    context = {
+        'revenue_by_month': revenue_by_month,
+        'revenue_by_treatment':revenue_by_treatment,
+        'treatment_popularity': treatment_popularity,
+        'appointments_by_month': appointments_by_month,
+        'appointments_by_status': appointments_by_status,
+        'total_income_today': total_income_today,
+        'total_income_month': total_income_month,
+        'total_income_all': total_income_all,
+        'years': years,
+        'months': months,
+        'days': days,
+        'selected_year': selected_year,
+        'selected_month': selected_month,
+        'selected_day': selected_day,
+        
+    }
+    return render(request,'manager/second_dashboard.html',context)
 
 @user_passes_test(is_manager, login_url='login')
 def user_list(request):
@@ -314,7 +319,6 @@ def update_role(request):
 @user_passes_test(is_manager, login_url='login')
 def dentist_list(request):
     users = User.objects.filter(is_dentist=True)
-
     #paginator
     paginator = Paginator(users,10)
     page_number = request.GET.get('page')
