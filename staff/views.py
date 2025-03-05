@@ -433,10 +433,9 @@ def close_0ff_day(request):
 
 @user_passes_test(is_staff, login_url='login')
 def delete_closed_day(request, pk):
-    # ตรวจสอบว่ามี ClosedDay อยู่หรือไม่
     closed_day = get_object_or_404(ClosedDay, pk=pk)
     if request.method == 'POST':
-        closed_day.delete()  # ลบวันปิดทำการ
+        closed_day.delete()  
         return redirect('calendar')  
 
 @user_passes_test(is_staff, login_url='login')

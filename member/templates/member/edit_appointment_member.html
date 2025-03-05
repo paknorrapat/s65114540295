@@ -29,7 +29,7 @@
                 
                     <!-- เพิ่ม Dropdown สำหรับ Time Slot -->
                     <label for="time_slot">เวลา</label><br>
-                    <select id="time_slot" name="time_slot"  class="select select-bordered w-full  max-w-xs my-1">
+                    <select id="time_slot" name="time_slot"  required class="select select-bordered w-full  max-w-xs my-1">
                         <option value="">เลือกเวลา</option>
                         {% if appointment.time_slot %}
                             <option value="{{ appointment.time_slot }}" selected>{{ appointment.time_slot }}</option>

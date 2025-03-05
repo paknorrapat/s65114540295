@@ -104,14 +104,14 @@ class TreatmentHistory(models.Model):
     def __str__(self):
         # ตรวจสอบว่า appointment และ user มีค่าหรือไม่
         if self.appointment and self.appointment.user:
-            user_name = f'{self.appointment.user.title}{self.appointment.user.first_name} {self.appointment.user.last_name}'
+            user_name = f'{self.appointment.user.title}{self.appointment.user.first_name} {self.appointment.user.last_name} '
         else:
             user_name = 'Unknown User'
 
         # ตรวจสอบว่า treatment มีค่าหรือไม่
         treatment_name = self.appointment.treatment.treatmentName if self.appointment and self.appointment.treatment else 'No Treatment'
 
-        return f'{user_name} : {treatment_name}'
+        return f'{user_name} : {treatment_name} on {self.appointment.date}'
 
 class ClosedDay(models.Model):
     dentist = models.ForeignKey(Dentist,on_delete=models.CASCADE)
