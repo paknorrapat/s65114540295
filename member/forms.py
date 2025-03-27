@@ -9,3 +9,12 @@ class AppointmentForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
             'time_slot': forms.TimeInput(attrs={'type': 'time'}),
         }
+
+class AppointmentDateForm(forms.ModelForm):
+    class Meta:
+        model = Appointment
+        fields = ['date', 'time_slot']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'time_slot': forms.TimeInput(attrs={'type': 'time'}),
+        }

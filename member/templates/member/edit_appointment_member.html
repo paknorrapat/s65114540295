@@ -11,7 +11,7 @@
                     {% csrf_token %}
 
                     <label for="user">ชื่อคนไข้</label><br>
-                    <input type="text" id="user" name="name" value="{{appointment.user.title}}{{ appointment.user.first_name }} {{ appointment.user.last_name }}" readonly class="input input-bordered max-w-xs w-full  my-1" >
+                    <input type="text" id="userName" name="userName" value="{{appointment.user.title}}{{ appointment.user.first_name }} {{ appointment.user.last_name }}" readonly class="input input-bordered max-w-xs w-full  my-1" >
                     <!-- ฟิลด์ hidden สำหรับส่งค่า user.id -->
                     <input type="hidden" name="user" value="{{ appointment.user.id }}"> 
 
@@ -55,6 +55,7 @@
 
 
     function updateTimeSlots() {
+        
     var selectedDate = document.getElementById('date').value;
     var selectedDentist = document.getElementById('dentist').value;
     var timeSlotSelect = document.getElementById('time_slot');
@@ -89,17 +90,8 @@
 }
 
 // เชื่อม Event กับ Date และ Dentist Dropdown
-document.getElementById('date').addEventListener('change', function() {
-    // เมื่อมีการเปลี่ยนวัน, ลบเวลาเดิม
-    document.getElementById('time_slot').value = '';  // ลบการเลือกเวลา
-    updateTimeSlots();  // อัปเดตเวลาใหม่
-});
-
+document.getElementById('date').addEventListener('change', updateTimeSlots);
 document.getElementById('dentist').addEventListener('change', updateTimeSlots);
 
-// เมื่อหน้าโหลดให้โหลด slot เวลาทั้งหมด
-document.addEventListener('DOMContentLoaded', function() {
-    updateTimeSlots();
-});
 </script>
 {% endblock %}

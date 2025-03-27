@@ -6,6 +6,7 @@ from .forms import *
 from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test,login_required
 from datetime import datetime
+from django.contrib import messages
 
 def is_dentist(user):
     return user.is_authenticated and user.is_dentist
@@ -57,7 +58,7 @@ def dentist_home(request):
     (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
     (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
     ]
-    years =range(2021,datetime.now().year + 1)
+    years =range(2024,datetime.now().year + 1)
 
     statuses = [
         ('รอดำเนินการ', 'รอดำเนินการ'),  
@@ -151,7 +152,7 @@ def t_history_all(request):
     (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
     (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
     ]
-    years =range(2021,datetime.now().year + 1)
+    years =range(2024,datetime.now().year + 1)
 
     return render(request,"dentist/t_history_all.html",{'page_obj':page_obj,
                                                         "days": days,
@@ -167,8 +168,6 @@ def t_history_all(request):
 def add_treatment_history(request, apt_id):
     appointment = get_object_or_404(Appointment, id=apt_id)
     extras = Extra.objects.all()
-    treatments = Treatment.objects.all()
-
     if request.method == "POST":
         form = TreatmentHistoryForm(request.POST)
         if form.is_valid():
@@ -176,13 +175,14 @@ def add_treatment_history(request, apt_id):
             treatmenthistory.appointment = appointment
             treatmenthistory.status = True
             treatmenthistory.save()
-
+            messages.success(request, 'เพิ่มประวัติการรักษาสำเร็จ')
             return redirect("treatment-history")
-    
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect("treatment-history")
     context = {
         'extras': extras,
         'appointment': appointment,
-        'treatments': treatments,
     }
     return render(request, 'dentist/add_t_history.html',context)
 
@@ -195,10 +195,11 @@ def update_treatment_history(request,treatment_history_id):
             treatmenthistory = form.save(commit=False)
             treatment_history.status = True  
             treatmenthistory.save()
+            messages.success(request, 'แก้ไขประวัติการรักษาสำเร็จ')
             return redirect("t-history-all")
-    else:
-        form = TreatmentHistoryForm(instance=treatment_history)
-        
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect("t-history-all")
     context = {
         'treatment_history':treatment_history
     }

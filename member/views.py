@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404,reverse
 from Sparky.models import Dentist,Treatment,Appointment,TreatmentHistory,ClosedDay
-from .forms import AppointmentForm
+from .forms import AppointmentForm,AppointmentDateForm
 from django.http import JsonResponse
 from datetime import datetime,date,timedelta
 import json
@@ -10,6 +10,7 @@ from django.db.models import Q,Sum,Count
 from django.utils.timezone import now
 from django.contrib.auth.decorators import user_passes_test,login_required
 from django.http import HttpResponseForbidden
+from django.contrib import messages
 
 def is_member(user):
     return user.is_authenticated 
@@ -97,7 +98,7 @@ def braces_progress(request,user_id):
     treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id).order_by('-appointment__date')
     braces = treatment_history.filter(appointment__treatment__is_braces=True)
     
-     # pagination
+    # pagination
     paginator = Paginator(braces,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -106,39 +107,27 @@ def braces_progress(request,user_id):
     total_cost = treatment_history.filter(appointment__treatment__is_braces=True).aggregate(total=Sum('cost'))['total'] or 0
 
     # ค่าใช้จ่ายของ "เคลียร์ช่องปาก"
-    clear_cost = treatment_history.filter(
-        appointment__treatment__treatmentName='เคลียร์ช่องปาก'
-    ).aggregate(total=Sum('cost'))['total'] or 0
+    clear_cost = treatment_history.filter(appointment__treatment__treatmentName='เคลียร์ช่องปาก').aggregate(total=Sum('cost'))['total'] or 0
 
     max_cost = 40000 + clear_cost # ค่าใช้จ่ายรวมทั้งหมด
     percentage_paid = min((total_cost / max_cost) * 100, 100)  # จำกัดไม่เกิน 100%
 
     # ตรวจสอบสถานะของ "ปรึกษาวางแผนจัดฟัน"
-    step1_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True
-    ).exists()
+    step1_completed = treatment_history.filter(appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True).exists()
 
     # ตรวจสอบสถานะของ "เคลียร์ช่องปาก"
-    step2_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='เคลียร์ช่องปาก', status=True
-    ).exists()
+    step2_completed = treatment_history.filter(appointment__treatment__treatmentName='เคลียร์ช่องปาก', status=True).exists()
 
     # ตรวจสอบสถานะของ "พิมพ์ปากและเอกซเรย์"
-    step3_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='พิมพ์ปากและเอกซเรย์', status=True
-    ).exists()
+    step3_completed = treatment_history.filter(appointment__treatment__treatmentName='พิมพ์ปากและเอกซเรย์', status=True).exists()
 
     # ตรวจสอบสถานะของ "ติดเครื่องมือ"
     step4_total = 30  # จำนวนครั้งที่ต้องการ
-    step4_count = treatment_history.filter(
-        appointment__treatment__treatmentName='ติดเครื่องมือ', status=True
-    ).count()
+    step4_count = treatment_history.filter(appointment__treatment__treatmentName='ติดเครื่องมือ', status=True).count()
     step4_completed = step4_count >= step4_total
 
     # ตรวจสอบสถานะของ "ถอดเครื่องมือ"
-    step5_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True
-    ).exists()
+    step5_completed = treatment_history.filter(appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True).exists()
 
     context = {"treatment_history": treatment_history,
                "step1_completed": step1_completed,
@@ -164,16 +153,15 @@ def appointment_view(request,dentist_id):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             appointment = form.save(commit=False)
-
             appointment.user = request.user
-            appointment.dentist = dentist  # กำหนด Dentist ที่เลือก
+            appointment.dentist = dentist  
             appointment.save()
+            messages.success(request, 'เพิ่มข้อมูลนัดหมายสำเร็จ')
             return redirect('member-home')
-    else:
-        form = AppointmentForm()
-    
+        else:
+            messages.error(request, 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอก')
+            return redirect('member-home')
     context = {
-        'form':form,
         'dentist':dentist,
         'treatments':treatments
     }
@@ -188,8 +176,8 @@ def get_time_slots(request):
     if request.user.is_staff:
         user_id = request.GET.get('user_id')
     else:
-        user_id = request.user.id  
-       
+        user_id = request.user.id 
+
     if not date_str:
         return JsonResponse({'slots':[]})
     
@@ -254,10 +242,9 @@ def calendar_view(request):
 
         #คำนวณจำนวนคิวที่รับได้ต่อวัน
         total_slots = (datetime.combine(datetime.today(),end_time) - datetime.combine(datetime.today(),start_time)).seconds // (slot_duration * 60)
-
         # ดึงวันทำงานจาก `dentist.workDays`
         work_days = set(map(int, dentist.workDays.split(',')))  # แปลงเป็น `set(int)` [1=จันทร์, ..., 7=อาทิตย์]
-
+     
         # สร้างวันที่ทันตแพทย์ควรทำงานตาม `workDays`
         today = datetime.today().date()
         days_ahead = 60  # แสดงล่วงหน้า 60 วัน
@@ -293,7 +280,7 @@ def calendar_view(request):
     for (date,dentist_id), slot_data in available_slots.items():
         dentist = Dentist.objects.get(id=dentist_id)
         events.append({
-            'title': f'{dentist.user.first_name}:{slot_data["remaining"]}/{slot_data["total"]} คิว',
+            'title': f'{dentist.user.first_name} : {slot_data["remaining"]} / {slot_data["total"]} คิว',
             'start': date,
             'allDay':True,
             'color': 'gray' if slot_data["remaining"] == slot_data["total"]  else 'green',
@@ -319,59 +306,52 @@ def calendar_view(request):
     context = {
         'events': json.dumps(events,default=str),  # แปลง events เป็น JSON string
         'dentists': dentists
- 
     }
   
     return render(request, 'appointment/calendar.html', context)
 
 @user_passes_test(is_member, login_url='login')
 def select_appointment_date(request, appointment_id):
-  
     appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
-
     if request.method == 'POST':
-        selected_date = request.POST.get('date')
-        selected_time = request.POST.get('time_slot')
-
-        # บันทึกวันและเวลาที่เลือก
-        appointment.date = selected_date
-        appointment.time_slot = selected_time
-        appointment.status = 'รอดำเนินการ'  
-        appointment.save()
-
-        return redirect('appointment-all')  
-
-
-    return render(request, 'member/select_appointment_date.html', {
-        'appointment': appointment,
-
-    })
+        form = AppointmentDateForm(request.POST, instance=appointment)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.status = 'รอดำเนินการ'
+            appointment.save()
+            messages.success(request, "เลือกวันและเวลานัดหมายเรียบร้อยแล้ว")
+            return redirect('appointment-all')
+        else:
+            messages.error(request, "ข้อมูลที่กรอกไม่ถูกต้อง")
+            return redirect('appointment-all')
+    context = {
+        'appointment': appointment
+    }
+    return render(request, 'member/select_appointment_date.html',context)
 
 @user_passes_test(is_member, login_url='login')
 def delete_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id=id)
     if request.method == 'POST':
         appointment.delete()
+        messages.success(request, 'ลบข้อมูลนัดหมายสำเร็จ')
         return redirect('appointment-all')
     return redirect('appointment-all')
 
 @user_passes_test(is_member, login_url='login')
 def edit_appointment_member(request,id):
     appointment = get_object_or_404(Appointment,id = id)
-    dentists = Dentist.objects.all() 
-    treatments = Treatment.objects.all()
     if request.method == 'POST':
         form = AppointmentForm(request.POST,instance=appointment)
         if form.is_valid():
             form.save()
+            messages.success(request, 'แก้ไขข้อมูลนัดหมายสำเร็จ')
             return redirect('appointment-all')
         else:
-            form = AppointmentForm(instance=appointment)
-
+            messages.success(request, 'ข้อมูลไม่ถูกต้อง')
+            return redirect('appointment-all')
     context = {
         'appointment':appointment,
-        'dentists':dentists,
-        'treatments':treatments,
     }
     return render(request,'member/edit_appointment_member.html',context)
 
@@ -396,12 +376,12 @@ def appointment_all(request):
     if selected_year:
         appointments = appointments.filter(date__year=selected_year)
     if selected_status:  # กรองตามสถานะ
-        appointments = appointments.filter(status=selected_status) 
+        appointments = appointments.filter(status=selected_status)
+
     # จัดการ Query Parameters (ลบ key 'page')
     query_params = request.GET.copy()
     if 'page' in query_params:
         query_params.pop('page')
-
 
     #ข้อมูล dropdown
     days = list(range(1,32))
@@ -411,7 +391,7 @@ def appointment_all(request):
     (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
     (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
     ]
-    years =range(2021,datetime.now().year + 1)
+    years =range(2024,datetime.now().year + 1)
 
     statuses = [
         ('รอดำเนินการ', 'รอดำเนินการ'),  

@@ -14,7 +14,7 @@
                 <h3 class="text-base text-blue-800 mb-4">สถานะการจัดฟัน</h3>
                 {% if step1_completed %}
                     <div class="space-y-4">
-                        {% for dentist in dentist_names %}
+                        {% for dentist in dentist_name %}
                         <p class="text-sm">ชื่อทันตแพทย์:{{ dentist }}</p>  <!-- แสดงชื่อทันตแพทย์ -->
                         {% endfor %}
                         <!-- ขั้นที่ 1: ปรึกษาวางแผน -->
@@ -157,6 +157,7 @@
     
     ///วันเวลา///
     function updateTimeSlots() {
+        console.log("updateTimeSlots function called");  // ตรวจสอบว่าโค้ดเข้าในฟังก์ชันนี้
         var selectedPatient = document.getElementById('user').value;
         var selectedDate = document.getElementById('date').value;
         var selectedDentist = document.getElementById('dentist').value;
@@ -169,6 +170,7 @@
         if (selectedDate && selectedDentist) {
             // ดึงข้อมูล Slot เวลาจาก Server โดยใช้ Ajax
             fetch(`/member/get-time-slots/?date=${selectedDate}&dentist_id=${selectedDentist}&user_id=${selectedPatient}`)
+    
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);

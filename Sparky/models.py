@@ -23,6 +23,9 @@ class User(AbstractUser):
     is_manager = models.BooleanField(default=False,verbose_name='เจ้าของคลินิก')
     title = models.CharField(max_length=30,verbose_name="คำนำหน้าชื่อ")
 
+    def __str__(self) :
+        return self.username
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
     idCard = models.CharField(max_length=13,verbose_name='เลขประจำตัวประชาชน',blank=True, null=True,unique=True)
@@ -39,7 +42,6 @@ class Profile(models.Model):
     allergic = models.CharField(max_length=500,blank=True,null=True,verbose_name='ข้อมูลการแพ้ยา')
     allergic_symptoms = models.CharField(max_length=500, blank=True, null=True, verbose_name='อาการแพ้ยา')
 
-        
     def __str__(self) :
         return self.user.first_name +" "+self.user.last_name
 

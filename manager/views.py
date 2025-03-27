@@ -7,6 +7,7 @@ from datetime import datetime
 from django.db.models.functions import TruncMonth, ExtractHour, ExtractWeekDay
 from django.utils.timezone import now,localtime
 from django.contrib.auth.decorators import user_passes_test,login_required
+from django.contrib import messages
 
 def is_manager(user):
     return user.is_authenticated and user.is_manager
@@ -148,33 +149,21 @@ def dashboard(request):
 
 @user_passes_test(is_manager, login_url='login')
 def second_dashboard(request):
-    # กำหนดช่วงเวลา
-    today_date = localtime(now()).date()  # ดึงวันที่วันนี้
 
-    # คำนวณรายได้วันนี้
-    total_income_today = TreatmentHistory.objects.filter(
-        appointment__date=today_date  # ใช้ฟิลด์ date ในโมเดล Appointment
-    ).aggregate(Sum('cost'))['cost__sum'] or 0
-
-    # ดึงเดือนและปีปัจจุบัน
+    today_date = localtime(now()).date()  
     current_date = now()
     current_month = current_date.month
     current_year = current_date.year
 
-    # กรองรายได้เฉพาะเดือนและปีปัจจุบัน
-    total_income_month = TreatmentHistory.objects.filter(
-       appointment__date__year=current_year,
-       appointment__date__month=current_month,
-    ).aggregate(Sum('cost'))['cost__sum'] or 0
-
-    # คำนวณรายได้ทั้งหมด
+    total_income_today = TreatmentHistory.objects.filter(appointment__date=today_date ).aggregate(Sum('cost'))['cost__sum'] or 0
+    total_income_month = TreatmentHistory.objects.filter(appointment__date__year=current_year,appointment__date__month=current_month,).aggregate(Sum('cost'))['cost__sum'] or 0
     total_income_all = TreatmentHistory.objects.filter(appointment__date__year=current_year).aggregate(Sum('cost'))['cost__sum'] or 0
 
     # รับค่าปี, เดือน, และวันจาก GET parameter
     selected_year = request.GET.get('year', None)
     selected_month = request.GET.get('month', None)
     selected_day = request.GET.get('day', None)
-
+  
     # ตรวจสอบปี (ค่าเริ่มต้นเป็นปีปัจจุบัน)
     if not selected_year or not selected_year.isdigit():
         selected_year = now().year
@@ -304,16 +293,19 @@ def update_role(request):
             user.is_staff = True
             user.is_dentist = False
             user.save()
+            messages.success(request, 'เปลี่ยนสถานะสำเร็จ')
             return redirect('staff-list')
         elif role == "Dentist":
             user.is_staff = False
             user.is_dentist = True
             user.save()
+            messages.success(request, 'เปลี่ยนสถานะสำเร็จ')
             return redirect('dentist-list')
         else:  # Member
             user.is_staff = False
             user.is_dentist = False
             user.save()
+            messages.success(request, 'เปลี่ยนสถานะสำเร็จ')
             return redirect('user-list')
 
 @user_passes_test(is_manager, login_url='login')
@@ -340,5 +332,6 @@ def delete_user(request,user_id):
     user = get_object_or_404(User,id=user_id)
     if request.method == 'POST':
         user.delete()
+        messages.success(request, 'ลบผู้ใช้งานสำเร็จ')
         return redirect('user-list')
     return redirect('user-list')

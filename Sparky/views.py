@@ -27,11 +27,12 @@ def showprofile(request, user_id):
     if request.user.id != user_id and not request.user.is_staff and not request.user.is_dentist:
         return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")
     
-
-    age = calculate_age(user.profile.birthDate)  # คำนวณอายุ
+    if hasattr(user, 'profile') and user.profile.birthDate:
+        age = calculate_age(user.profile.birthDate)
+    else:
+        age = ""
     
-    
-    return render(request, "sparky/profile.html", {'user': user, 'age': age})  # ส่งค่าอายุไปยังเทมเพลต
+    return render(request, "sparky/profile.html", {'user': user, 'age': age})  
 
 
 def login(request):
@@ -44,22 +45,21 @@ def login(request):
             if user is not None:
                 auth_login(request,user)
                 if user.is_staff:
-                    # Redirect ไปหน้า staff
+                    messages.success(request,'เข้าสู่ระบบสำเร็จ')
                     return redirect('staff-home')
                 elif user.is_manager:
-                    # Redirect ไปหน้า manager
+                    messages.success(request,'เข้าสู่ระบบสำเร็จ')
                     return redirect('dashboard')
                 elif user.is_dentist:
-                    # Redirect ไปหน้า dentist
+                    messages.success(request,'เข้าสู่ระบบสำเร็จ')
                     return redirect('dentist-home')
                 else:
-                    # Redirect ไปหน้า member
+                    messages.success(request,'เข้าสู่ระบบสำเร็จ')
                     return redirect('member-home')
             else:
                 messages.error(request,'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')
-    else:
-        form = LoginForm()
-    return render(request,'registration/login.html',{'form':form})
+                return redirect('login')
+    return render(request,'registration/login.html')
 
 @login_required(login_url='login')
 def logout(request):
@@ -71,17 +71,12 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            messages.success(request, 'สมัครสมาชิกสำเร็จ')
             return redirect('profile-form',user_id=user.id)   
         else:
             messages.error(request, 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอก')
-    else:
-        form = RegisterForm()
-
-    # ล้าง messages หลังจากแสดงผล
-    storage = messages.get_messages(request)
-    list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
-
-    return render(request,'registration/register.html',{'form':form})
+            return redirect('register')
+    return render(request,'registration/register.html')
 
 def profile(request,user_id):
     user = get_object_or_404(User, id=user_id)
@@ -91,25 +86,22 @@ def profile(request,user_id):
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
+            messages.success(request, 'เพิ่มข้อมูลส่วนตัวสำเร็จ')
             return redirect('login')
-              
-    else:
-        profile_form = ProfileForm()
-
-    return render(request,'registration/profile_form.html',{'profile_form':profile_form})
+        else:
+            messages.error(request, 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลที่กรอก')
+            return redirect('profile-form',user_id=user.id)      
+    return render(request,'registration/profile_form.html')
 
 @login_required(login_url='login')
 def updateprofile(request, user_id):
     if request.user.id != user_id :
-        return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")
-    
+        return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าถึงโปรไฟล์นี้")  
     user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(Profile, user=user)
-    
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
-        
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)  
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
@@ -117,17 +109,9 @@ def updateprofile(request, user_id):
             return redirect('profile', user_id=user.id)
         else:
             messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
-
-          
-    else:
-        user_form = UserForm(instance=user)
-        profile_form = ProfileForm(instance=profile)
-
+            return redirect('update-profile', user_id=user.id)
     context = {
         'user': user, 
         'profile': profile
     }
-    # ล้าง messages หลังจากแสดงผล
-    storage = messages.get_messages(request)
-    list(storage)  # ดึงข้อความทั้งหมดเพื่อบังคับให้ระบบล้าง
     return render(request, 'sparky/update_profile.html', context)

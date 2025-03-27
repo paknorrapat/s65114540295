@@ -99,6 +99,7 @@ def appointment_list(request):
     query_params = request.GET.copy()
     if 'page' in query_params:
         query_params.pop('page')
+
     # pagination
     paginator = Paginator(appointments,10) # แบ่งเป็นหน้า 10 รายการต่อหน้า
     page_number = request.GET.get('page')
@@ -112,7 +113,7 @@ def appointment_list(request):
     (5, "พฤษภาคม"), (6, "มิถุนายน"), (7, "กรกฎาคม"), (8, "สิงหาคม"),
     (9, "กันยายน"), (10, "ตุลาคม"), (11, "พฤศจิกายน"), (12, "ธันวาคม")
     ]
-    years =range(2021,datetime.now().year + 1)
+    years =range(2024,datetime.now().year + 1)
 
     statuses = [
         ('รอดำเนินการ', 'รอดำเนินการ'),  
@@ -140,6 +141,7 @@ def delete_appointment(request,id):
     appointment = get_object_or_404(Appointment,id=id)
     if request.method == 'POST':
         appointment.delete()
+        messages.success(request, 'ลบข้อมูลนัดหมายสำเร็จ')
         return redirect('appointment-list')
     return redirect('appointment-list')
 
@@ -153,41 +155,30 @@ def add_appointment(request,user_id):
 
     treatment_history = TreatmentHistory.objects.filter(appointment__user = user_id)
 
-    dentist_braces = TreatmentHistory.objects.filter(appointment__user = user_id,appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True
-    )
+    dentist_braces = TreatmentHistory.objects.filter(appointment__user = user_id,appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True)
    
     # ดึงชื่อทันตแพทย์ในรูปแบบที่อ่านง่าย
-    dentist_name_list = [
+    dentist_name = [
         f"{dentist['appointment__dentist__user__title']}{dentist['appointment__dentist__user__first_name']} {dentist['appointment__dentist__user__last_name']}"
         for dentist in dentist_braces.values('appointment__dentist__user__title', 'appointment__dentist__user__first_name','appointment__dentist__user__last_name')
     ]
 
     # ตรวจสอบสถานะของ "ปรึกษาวางแผนจัดฟัน"
-    step1_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True
-    ).exists()
+    step1_completed = treatment_history.filter(appointment__treatment__treatmentName='ปรึกษาวางแผนจัดฟัน', status=True).exists()
 
     # ตรวจสอบสถานะของ "เคลียร์ช่องปาก"
-    step2_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='เคลียร์ช่องปาก', status=True
-    ).exists()
+    step2_completed = treatment_history.filter(appointment__treatment__treatmentName='เคลียร์ช่องปาก', status=True).exists()
 
     # ตรวจสอบสถานะของ "พิมพ์ปากและเอกซเรย์"
-    step3_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='พิมพ์ปากและเอกซเรย์', status=True
-    ).exists()
+    step3_completed = treatment_history.filter(appointment__treatment__treatmentName='พิมพ์ปากและเอกซเรย์', status=True).exists()
 
     # ตรวจสอบสถานะของ "ติดเครื่องมือ"
     step4_total = 30  # จำนวนครั้งที่ต้องการ
-    step4_count = treatment_history.filter(
-        appointment__treatment__treatmentName='ติดเครื่องมือ', status=True
-    ).count()
+    step4_count = treatment_history.filter(appointment__treatment__treatmentName='ติดเครื่องมือ', status=True).count()
     step4_completed = step4_count >= step4_total
 
     # ตรวจสอบสถานะของ "ถอดเครื่องมือ"
-    step5_completed = treatment_history.filter(
-        appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True
-    ).exists()
+    step5_completed = treatment_history.filter( appointment__treatment__treatmentName='ถอดเครื่องมือ', status=True).exists()
 
     if request.method == 'POST':
         form = AppointmentForm(request.POST)
@@ -209,46 +200,50 @@ def add_appointment(request,user_id):
                         user=user,
                         treatment=appointment.treatment,
                         dentist=appointment.dentist,
-                        date=None,  # ยังไม่ได้เลือกวัน
-                        time_slot=None,  # ยังไม่ได้เลือกเวลา
-                        status='รอดำเนินการ',  # สถานะเริ่มต้น
-                        detail=f'ครั้งที่ {i}'  # ระบุรายละเอียดเป็น "ครั้งที่ i"
+                        date=None,  
+                        time_slot=None,  
+                        status='รอดำเนินการ',  
+                        detail=f'ครั้งที่ {i}'  
                     ))
 
                 # บันทึกในฐานข้อมูล
                 Appointment.objects.bulk_create(appointments)
-
+            messages.success(request, 'เพิ่มข้อมูลนัดหมายสำเร็จ')
             return redirect('staff-home')
-    else:
-        form = AppointmentForm()
-    return render(request,'staff/add_appointment.html',{'user': user,
-                                                        'dentists':dentists,
-                                                        'treatments':treatments,
-                                                        "step1_completed": step1_completed,
-                                                         "step2_completed": step2_completed,
-                                                         "step3_completed": step3_completed,
-                                                         "step4_completed": step4_completed,
-                                                         "step4_count": step4_count,
-                                                         "step4_total": step4_total,
-                                                         "step5_completed": step5_completed,
-                                                         'dentist_names': dentist_name_list,
-                                                       
-                                                        })
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('staff-home')
+    context = {
+        'user': user,
+        'dentists':dentists,
+        'treatments':treatments,
+        "step1_completed": step1_completed,
+        "step2_completed": step2_completed,
+        "step3_completed": step3_completed,
+        "step4_completed": step4_completed,
+        "step4_count": step4_count,
+        "step4_total": step4_total,
+        "step5_completed": step5_completed,
+        'dentist_name': dentist_name,                                                
+    }
+    return render(request,'staff/add_appointment.html',context)
 
 @user_passes_test(is_staff, login_url='login')
 def update_appointment(request,appointment_id):
     appointment = get_object_or_404(Appointment,id = appointment_id)
-    dentists = Dentist.objects.all() 
-    treatments = Treatment.objects.all()
     if request.method == 'POST':
         form = AppointmentStatus(request.POST,instance=appointment)
         if form.is_valid():
             form.save()
-           
+            messages.success(request, 'แก้ไขข้อมูลนัดหมายสำเร็จ')
             return redirect('appointment-list')
-        
-    return render(request,'staff/edit_appointment.html',{'appointment':appointment,'dentists':dentists,
-        'treatments':treatments,})
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('appointment-list')
+    context = {
+        'appointment':appointment,
+    }
+    return render(request,'staff/edit_appointment.html',context)
 
 
 @user_passes_test(is_staff, login_url='login')
@@ -286,9 +281,12 @@ def add_dentist(request):
             dentist = form.save(commit=False)  # บันทึกข้อมูลก่อน แต่ไม่ commit
             work_days = request.POST.getlist('workDays')  # ใช้ getlist เพื่อรับค่าหลายค่า
             dentist.workDays = ",".join(work_days)  # เก็บค่า workDays เป็น string ที่แยกด้วยเครื่องหมายจุลภาค
-            dentist.save()  # บันทึกข้อมูลทันตแพทย์
+            dentist.save() 
+            messages.success(request, 'เพิ่มข้อมูลทันตแพทย์สำเร็จ')
             return redirect('dentist-manage') 
-        
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('dentist-manage') 
     return redirect('dentist-manage')
 
 @user_passes_test(is_staff, login_url='login')
@@ -296,6 +294,7 @@ def delete_dentist(request,dentist_id):
     dentist = get_object_or_404(Dentist,id=dentist_id)
     if request.method == 'POST':
         dentist.delete()
+        messages.success(request, 'ลบข้อมูลทันตแพทย์สำเร็จ')
         return redirect('dentist-manage')
     return redirect('dentist-manage')
 
@@ -310,10 +309,11 @@ def edit_dentist(request,dentist_id):
             work_days = request.POST.getlist('workDays')  # ใช้ getlist เพื่อรับค่าหลายค่า
             dentist.workDays = ",".join(work_days)  # เก็บค่า workDays เป็น string ที่แยกด้วยเครื่องหมายจุลภาค
             form.save()
+            messages.success(request, 'แก้ไขข้อมูลทันตแพทย์สำเร็จ')
             return redirect('dentist-manage')
-    else:
-        form = DentistForm(instance=dentist)
-
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('dentist-manage')
     context = { 
         'dentist':dentist
     }
@@ -342,7 +342,11 @@ def add_treatment(request):
         form = TreatmentForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'เพิ่มประเภทการรักษาสำเร็จ')
             return redirect("treatment-manage")
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('treatment-manage')
     return redirect("treatment-manage")
 
 @user_passes_test(is_staff, login_url='login')
@@ -350,6 +354,7 @@ def delete_treatment(request,treatment_id):
     treatment = get_object_or_404(Treatment,id=treatment_id)
     if request.method == 'POST':
         treatment.delete()
+        messages.success(request, 'ลบประเภทการรักษาสำเร็จ')
         return redirect('treatment-manage')
     return redirect('treatment-manage')
 
@@ -360,8 +365,11 @@ def edit_treatment(request,treatment_id):
         form = TreatmentForm(request.POST,instance = treatment)
         if form.is_valid():
             form.save()
+            messages.success(request, 'แก้ไขประเภทการรักษาสำเร็จ')
             return redirect("treatment-manage")
-    
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('treatment-manage')
     context ={
         "treatment":treatment
     }
@@ -373,7 +381,11 @@ def add_extra(request):
         form = ExtraForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'เพิ่มรายการเพิ่มเติมสำเร็จ')
             return redirect("treatment-manage")
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('treatment-manage')
     return redirect("treatment-manage")
 
 @user_passes_test(is_staff, login_url='login')
@@ -381,6 +393,7 @@ def delete_extra(request,extra_id):
     extra = get_object_or_404(Extra,id=extra_id)
     if request.method == 'POST':
         extra.delete()
+        messages.success(request, 'ลบรายการเพิ่มเติมสำเร็จ')
         return redirect('treatment-manage')
     return redirect('treatment-manage')
 
@@ -391,8 +404,11 @@ def edit_extra(request,extra_id):
         form = ExtraForm(request.POST,instance = extra)
         if form.is_valid():
             form.save()
+            messages.success(request, 'แก้ไขรายการเพิ่มเติมสำเร็จ')
             return redirect("treatment-manage")
-        
+        else:
+            messages.error(request, 'ข้อมูลที่กรอกไม่ถูกต้อง')
+            return redirect('treatment-manage')
     context = {
         "extra":extra
     }
@@ -420,23 +436,27 @@ def close_0ff_day(request):
     if request.method == "POST":
         date = request.POST.get('date')
         dentist_id = request.POST.get('dentist_id')
-        
-        dentist = Dentist.objects.filter(id=dentist_id).first()
-     
-        # ตรวจสอบว่ามีการปิดวันในวันที่เลือกแล้วหรือยัง
-        if ClosedDay.objects.filter(dentist=dentist, date=date).exists():
-            return redirect('calendar')
+        dentist = get_object_or_404(Dentist, id=dentist_id)
 
-        # บันทึกวันปิดทำการ
-        ClosedDay.objects.create(date=date, dentist=dentist)
-        return redirect('calendar')
+        closed_day = ClosedDay.objects.filter(dentist=dentist, date=date).first()
+
+        if closed_day:
+            messages.error(request, "วันปิดทำการในวันที่นี้มีแล้ว")
+            return redirect('calendar')
+        else:
+            ClosedDay.objects.create(date=date, dentist=dentist)
+            messages.success(request, "บันทึกวันปิดทำการเรียบร้อยแล้ว")
+            return redirect('calendar')
+    return redirect('calendar')
 
 @user_passes_test(is_staff, login_url='login')
 def delete_closed_day(request, pk):
     closed_day = get_object_or_404(ClosedDay, pk=pk)
     if request.method == 'POST':
-        closed_day.delete()  
-        return redirect('calendar')  
+        closed_day.delete()
+        messages.success(request, 'ลบวันปิดทำการสำเร็จ') 
+        return redirect('calendar')
+    return redirect('calendar')   
 
 @user_passes_test(is_staff, login_url='login')
 def closed_day_list(request):
@@ -456,7 +476,11 @@ def update_status_appointment(request):
         appointment = get_object_or_404(Appointment, id=appointment_id)
         if status in ['รอดำเนินการ', 'สำเร็จ', 'ไม่สำเร็จ']:  
             appointment.status = status
-            appointment.save()  
+            appointment.save()
+            messages.success(request, 'เปลี่ยนสถานะนัดหมายสำเร็จ')
             return redirect('staff-home')  
         else:
+            messages.error(request, 'ข้อมูลไม่ถูกต้อง')
             return redirect('staff-home')  
+    return redirect('staff-home')  
+    
