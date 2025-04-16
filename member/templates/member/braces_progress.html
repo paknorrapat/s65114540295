@@ -158,7 +158,7 @@
                                         '{% if history.appointment.detail %}{{ history.appointment.detail }} {{ history.appointment.treatment.treatmentName }} {% else %}{{ history.appointment.treatment.treatmentName }} {% endif %}',
                                         '{{ history.appointment.date }}',
                                         '{{ history.cost|floatformat:0|intcomma }}',
-                                        '{{ history.description|escapejs }}')">
+                                        )">
                                         <i class="fa-solid fa-circle-chevron-right text-xl text-blue-800"></i>
                                     </a>
                                 </p>
@@ -192,29 +192,30 @@
 </div>
 <!-- Modal -->
 <div id="historyModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-500 bg-opacity-50">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
-        <h3 class="text-lg font-semibold text-blue-800 mb-4">รายละเอียดการรักษา</h3>
-        <p><strong>วันที่ทำการรักษา:</strong> <span id="modalDate"></span></p>
-        <p><strong>ชื่อ:</strong> <span id="modalPatientName"></span></p>
-        <p><strong>ชื่อทันตแพทย์:</strong> <span id="modalDentistName"></span></p>
-        <p><strong>ประเภทการรักษา:</strong> <span id="modalTreatmentName"></span></p>
-        <p><strong>รายละเอียด:</strong></p>
-        <span id="modalDescription"></span>
-        <p><strong>ค่าใช้จ่ายทั้งหมด:</strong> <span id="modalCost"></span> บาท</p>
+    <div class="bg-white rounded-lg shadow-lg p-6 w-1/3 max-w-lg">
+        <h3 class="text-xl font-semibold text-blue-800 mb-4 text-center">ประวัติการชำระ</h3>
+        
+        <div class="space-y-3">
+            <p><strong class="text-blue-600">วันที่ทำการรักษา:</strong> <span id="modalDate" class="text-gray-800"></span></p>
+            <p><strong class="text-blue-600">ชื่อ:</strong> <span id="modalPatientName" class="text-gray-800"></span></p>
+            <p><strong class="text-blue-600">ชื่อทันตแพทย์:</strong> <span id="modalDentistName" class="text-gray-800"></span></p>
+            <p><strong class="text-blue-600">ประเภทการรักษา:</strong> <span id="modalTreatmentName" class="text-gray-800"></span></p>
+            <p><strong class="text-blue-600">ค่าใช้จ่ายทั้งหมด:</strong> <span id="modalCost" class="text-gray-800"></span> บาท</p>
+        </div>
+        
         <div class="mt-4 flex justify-end">
-            <button class="btn bg-blue-500 text-white hover:bg-blue-400" onclick="closeHistoryModal()">ปิด</button>
+            <button class="btn bg-blue-500 text-white hover:bg-blue-400 py-2 px-4 rounded-md" onclick="closeHistoryModal()">ปิด</button>
         </div>
     </div>
 </div>
 <script>
-function openHistoryModal(patientName, dentistName,treatmentName, date, cost, description) {
+function openHistoryModal(patientName, dentistName,treatmentName, date, cost) {
         // แสดงข้อมูลใน Modal
         document.getElementById('modalPatientName').textContent = patientName;
         document.getElementById('modalDentistName').textContent = dentistName;
         document.getElementById('modalTreatmentName').textContent = treatmentName;
         document.getElementById('modalDate').textContent = date;
         document.getElementById('modalCost').textContent = cost;
-        document.getElementById('modalDescription').textContent = description;
 
         // แสดง Modal
         document.getElementById('historyModal').classList.remove('hidden');
