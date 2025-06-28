@@ -3,6 +3,7 @@
 วิชา Selected Topics in Software Innovation
 
 #mysql ติดตั้งโดยใช้ scoop 
+
 1.ตั้งค่า environment > path
 
 2.C:\Users\Advice KH\scoop\apps\mysql\current\bin\
