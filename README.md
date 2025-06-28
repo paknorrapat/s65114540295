@@ -12,6 +12,7 @@
 C:\Users\Advice KH>mysql --version
 
 C:\Users\Advice KH\scoop\apps\mysql\current\bin\mysql.exe  Ver 9.0.0 for Win64 on x86_64 (MySQL Community Server - GPL)
+
 4.เปิดสอง terminal
 
 #terminal1
