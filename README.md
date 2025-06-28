@@ -2,7 +2,9 @@
 65114540295 นรภัทร พันรอบ
 วิชา Selected Topics in Software Innovation
 
-#mysql ติดตั้งโดยใช้ scoop 
+# ต้องมี Docker 
+
+#mysql ติดตั้งโดยใช้ scoop
 
 1.ตั้งค่า environment > path
 
