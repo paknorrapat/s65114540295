@@ -2,7 +2,7 @@
 65114540295 นรภัทร พันรอบ
 วิชา Selected Topics in Software Innovation
 
-# ต้องมี Docker 
+# ต้องมี Docker MySQL
 
 #mysql ติดตั้งโดยใช้ scoop
 
