@@ -1,39 +1,24 @@
 # ระบบจัดการคลินิกทันตกรรมสปาร์คกี้ 
 65114540295 นรภัทร พันรอบ
 วิชา Selected Topics in Software Innovation
-
-# ต้องมี Docker MySQL
-
-#mysql ติดตั้งโดยใช้ scoop
-
-1.ตั้งค่า environment > path
-
-C:\Users\Advice KH\scoop\apps\mysql\current\bin\
-
-2.เช็ค mysql –version ต้องขึ้นแบบนี้
-
-C:\Users\Advice KH>mysql --version
-
-C:\Users\Advice KH\scoop\apps\mysql\current\bin\mysql.exe  Ver 9.0.0 for Win64 on x86_64 (MySQL Community Server - GPL)
-
-4.เปิดสอง terminal
-
-#terminal1
-
-mysqld –console
-
-#terminal2
-
-mysql -u root -p 
-
-show databases;
+# 1. โคลนโปรเจ็ค
+git clone https://github.com/paknorrapat/65114540295-select-topic.git
+# 2. Cd
+cd 65114540295-select-topic
+# 3. สร้าง Environment
+python -m venv venv
+# 4. ใช้ Environment
+venv\scripts\activate
+# 5. ติดตั้งไลบราลี จาก requirements.txt
+pip install -r requirements.txt
+# 6. สร้าง Database
+mysql -u root -p
 
 CREATE DATABASE sparky;
 
-#สร้างโฟลเดอร์ปกติหรือ mkdir …
+# 7. Migrate
+python manage.py migrate
 
-1.git clone https://github.com/paknorrapat/65114540295-select-topic.git
+# 8. Runserver
+python manage.py runserver
 
-2.cd 65114540295-select-topic
-
-3.docker-compose up --build
