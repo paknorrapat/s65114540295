@@ -1,6 +1,9 @@
 # ระบบจัดการคลินิกทันตกรรมสปาร์คกี้ 
 65114540295 นรภัทร พันรอบ
 วิชา Selected Topics in Software Innovation
+
+# Django MySQL
+
 # 1. โคลนโปรเจ็ค
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
 # 2. Cd
