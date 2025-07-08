@@ -4,7 +4,8 @@
 วิชา Selected Topics in Software Innovation
 
 # วิธีรันโปรเจ็ค
-## ต้องมี Docker (สำคัญ)
+## ต้องมี Docker ( สำคัญ )
+
 # 1. โคลนโปรเจ็ค
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
 # 2. Cd
