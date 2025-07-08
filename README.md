@@ -5,7 +5,7 @@
 
 # วิธีรันโปรเจ็ค
 ต้องมี Docker ( สำคัญ )
-![GitHub stars](https://img.shields.io/github/stars/username/repo)
+
 # 1. โคลนโปรเจ็ค
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
 # 2. Cd
