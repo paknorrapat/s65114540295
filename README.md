@@ -9,18 +9,19 @@
 
 > 💡 **ก่อนเริ่ม**: ต้องติดตั้ง **Docker** บนเครื่อง
 
+---
+
+### 1. 🐳 ติดตั้ง Docker
+
+ดาวน์โหลดและติดตั้ง Docker Desktop:
+
 🔗 [Download Docker for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
 
 ---
 
-### ⚙️ ขั้นตอนการติดตั้งและรัน
+### 2. 📥 Clone โปรเจกต์
 
 ```bash
-# 1. Clone โปรเจกต์
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
-```bash
-# 2. เข้าโฟลเดอร์โปรเจกต์
-cd 65114540295-select-topic
-```bash
-# 3. Run project ด้วย Docker Compose
-docker compose up -d --build
+---
+### 3. 
