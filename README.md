@@ -18,9 +18,9 @@
 ```bash
 # 1. Clone โปรเจกต์
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
-
+```bash
 # 2. เข้าโฟลเดอร์โปรเจกต์
 cd 65114540295-select-topic
-
+```bash
 # 3. Run project ด้วย Docker Compose
 docker compose up -d --build
