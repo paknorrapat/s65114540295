@@ -27,3 +27,12 @@ git clone https://github.com/paknorrapat/65114540295-select-topic.git
 ```bash
 cd 65114540295-select-topic
 ```
+### 4. ⚙️ Run project ด้วย Docker Compose
+```bash
+docker compose up -d --build
+```
+### 5. 🌐 เข้าใช้งานระบบ
+```bash
+เปิด browser แล้วเข้า:
+http://localhost:8000
+```
