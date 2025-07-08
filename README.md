@@ -1,33 +1,25 @@
-# ระบบจัดการคลินิกทันตกรรมสปาร์คกี้ 
+# 🦷 ระบบจัดการคลินิกทันตกรรมสปาร์คกี้
 
-65114540295 นรภัทร พันรอบ
-วิชา Selected Topics in Software Innovation
+**65114540295 นรภัทร พันรอบ**  
+วิชา *Selected Topics in Software Innovation*
 
-# How to run project!!!
-ต้องมี Docker ( สำคัญ )
+---
 
-1.Install Docker
-dowload https://docs.docker.com/desktop/setup/install/windows-install/
+## 🚀 วิธีรันโปรเจกต์ (How to Run)
 
-# 1. โคลนโปรเจ็ค
+> 💡 **ก่อนเริ่ม**: ต้องติดตั้ง **Docker** บนเครื่อง
+
+---
+
+### 1. 🐳 ติดตั้ง Docker
+
+ดาวน์โหลดและติดตั้ง Docker Desktop:
+
+🔗 [Download Docker for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+
+---
+
+### 2. 📥 Clone โปรเจกต์
+
+```bash
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
-
-# 2. Cd
-cd 65114540295-select-topic
-# 3. สร้าง Environment
-python -m venv venv
-# 4. ใช้ Environment
-venv\scripts\activate
-# 5. ติดตั้งไลบราลี จาก requirements.txt
-pip install -r requirements.txt
-# 6. สร้าง Database
-mysql -u root -p
-
-CREATE DATABASE sparky;
-
-# 7. Migrate
-python manage.py migrate
-
-# 8. Runserver
-python manage.py runserver
-
