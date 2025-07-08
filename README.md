@@ -3,11 +3,15 @@
 65114540295 นรภัทร พันรอบ
 วิชา Selected Topics in Software Innovation
 
-# วิธีรันโปรเจ็ค
+# How to run project!!!
 ต้องมี Docker ( สำคัญ )
+
+1.Install Docker
+dowload https://docs.docker.com/desktop/setup/install/windows-install/
 
 # 1. โคลนโปรเจ็ค
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
+
 # 2. Cd
 cd 65114540295-select-topic
 # 3. สร้าง Environment
