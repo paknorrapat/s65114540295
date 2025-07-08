@@ -23,7 +23,7 @@
 ```bash
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
 ```
-### 3. 
+### 3. 📁 เข้าโฟลเดอร์โปรเจกต์
 ```bash
 cd 65114540295-select-topic
 ```
