@@ -23,3 +23,5 @@
 
 ```bash
 git clone https://github.com/paknorrapat/65114540295-select-topic.git
+
+cd 65114540295-select-topic
