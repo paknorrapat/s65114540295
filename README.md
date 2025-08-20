@@ -29,7 +29,7 @@ cd 65114540295-select-topic
 ```
 ### 4. ⚙️ Run project ด้วย Docker Compose
 ```bash
-docker compose up -d --build
+docker compose up -d 
 ```
 ### 5. 🌐 เข้าใช้งานระบบ
 ```bash
