@@ -16,18 +16,21 @@ from dotenv import load_dotenv
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS","").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS","").split(",") if o.strip()]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-6@(*pwh&y)zpooah+o=f&3n6)l9t!&&)m&cx=*jpzsm=7yn3go"
+# SECRET_KEY = "django-insecure-6@(*pwh&y)zpooah+o=f&3n6)l9t!&&)m&cx=*jpzsm=7yn3go"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -55,6 +58,7 @@ AUTH_USER_MODEL ='Sparky.User'
 MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -63,7 +67,11 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 ROOT_URLCONF = "myproject.urls"
+
+# Tailwind (ใช้เฉพาะตอน dev บน Windows)
 TAILWIND_APP_NAME = 'theme'
 NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd"
 
@@ -167,7 +175,7 @@ LANGUAGE_CODE = 'th-th'
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-
+STATIC_ROOT = BASE_DIR / "staticfiles"   # สำหรับ collectstatic ตอน deploy
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
