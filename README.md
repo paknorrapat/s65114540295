@@ -21,11 +21,11 @@
 
 ### 2. 📥 Clone โปรเจกต์
 ```bash
-git clone https://github.com/paknorrapat/65114540295-select-topic.git
+git clone https://github.com/paknorrapat/s65114540295.git
 ```
 ### 3. 📁 เข้าโฟลเดอร์โปรเจกต์
 ```bash
-cd 65114540295-select-topic
+cd s65114540295
 ```
 ### 4. ⚙️ Run project ด้วย Docker Compose
 ```bash
