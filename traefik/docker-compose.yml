@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik-proxy
+    restart: unless-stopped
+    networks:
+      - traefik-public
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./tls.yml:/etc/traefik/dynamic/tls.yml:ro
+      - ./local.crt:/etc/traefik/certs/cert.pem:ro
+      - ./local.key:/etc/traefik/certs/key.pem:ro
+    
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+
+networks:
+  traefik-public:
+    external: true
+
+
