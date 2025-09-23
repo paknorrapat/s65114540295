@@ -21,6 +21,14 @@ DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS","").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS","").split(",") if o.strip()]
 
+# FORCE_SCRIPT_NAME = '/'+os.environ.get('PREFIX','')
+
+PREFIX = os.environ.get('PREFIX') # ดึงค่า PREFIX ออกมาก่อน
+# ถ้ามีค่า PREFIX อยู่, ให้สร้าง FORCE_SCRIPT_NAME ที่มี / นำหน้า
+# ถ้าไม่มี, ให้ FORCE_SCRIPT_NAME เป็นค่าว่าง
+FORCE_SCRIPT_NAME = f'/{PREFIX}' if PREFIX else ''
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -99,11 +107,11 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': 'db',        
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),        
     }
 }
 
@@ -174,8 +182,16 @@ LANGUAGE_CODE = 'th-th'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+# STATIC_URL = '/static/'
+STATIC_URL = FORCE_SCRIPT_NAME + '/static/'
+
 STATIC_ROOT = BASE_DIR / "staticfiles"   # สำหรับ collectstatic ตอน deploy
+
+STATICFILES_DIRS = [
+    BASE_DIR / "theme",
+]
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -187,3 +203,4 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = "norrapat.pr@gmail.com"
 EMAIL_HOST_PASSWORD = 'xhckqmadmouhqntc'
 EMAIL_USE_TLS = True 
+
