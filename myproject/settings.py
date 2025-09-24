@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import cloudinary
+
 from dotenv import load_dotenv
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -59,6 +61,9 @@ INSTALLED_APPS = [
     "dentist",
     "manager",
     "django.contrib.humanize",
+
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 AUTH_USER_MODEL ='Sparky.User'
@@ -75,7 +80,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = "myproject.urls"
 
@@ -191,6 +195,24 @@ STATICFILES_DIRS = [
     BASE_DIR / "theme",
 ]
 
+# Media settings (Cloudinary)
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_SECRET'),
+}
+
+# Storage config (Django 5.1+)
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
