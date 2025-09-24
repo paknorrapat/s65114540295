@@ -66,10 +66,12 @@ INSTALLED_APPS = [
     'cloudinary_storage',
 ]
 
+if DEBUG:
+    INSTALLED_APPS += ["django_browser_reload"]
+
 AUTH_USER_MODEL ='Sparky.User'
 
 MIDDLEWARE = [
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -79,6 +81,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+if DEBUG:
+    MIDDLEWARE += ["django_browser_reload.middleware.BrowserReloadMiddleware"]
 
 
 ROOT_URLCONF = "myproject.urls"

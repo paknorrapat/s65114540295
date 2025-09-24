@@ -26,7 +26,15 @@ urlpatterns = [
     path("staff/",include('staff.urls')),
     path("dentist/",include('dentist.urls')),
     path("manager/",include('manager.urls')),
-    path("__reload__/", include("django_browser_reload.urls")),
 
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+if settings.DEBUG:
+    # สำหรับ media files
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    # สำหรับ django-browser-reload
+    urlpatterns += [
+        path("__reload__/", include("django_browser_reload.urls")),
+    ]
 
