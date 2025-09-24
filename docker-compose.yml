@@ -21,10 +21,10 @@ services:
     - "traefik.http.routers.${PREFIX}-router.entrypoints=web"
     - "traefik.http.routers.${PREFIX}-router.middlewares=${PREFIX}-stripprefix-middleware@docker"
 
-    # # Static files router (without strip prefix)
-    # - "traefik.http.routers.${PREFIX}-static-router.rule=PathPrefix(`/${PREFIX}/static`)"
-    # - "traefik.http.routers.${PREFIX}-static-router.entrypoints=web"
-    # - "traefik.http.routers.${PREFIX}-static-router.service=${PREFIX}-service@docker"
+    # Static files router (without strip prefix)
+    - "traefik.http.routers.${PREFIX}-static-router.rule=PathPrefix(`/${PREFIX}/static`)"
+    - "traefik.http.routers.${PREFIX}-static-router.entrypoints=web"
+    - "traefik.http.routers.${PREFIX}-static-router.service=${PREFIX}-service@docker"
 
     # Middleware 
     - "traefik.http.middlewares.${PREFIX}-stripprefix-middleware.stripprefix.prefixes=/${PREFIX}"
